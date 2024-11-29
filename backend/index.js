@@ -4,6 +4,8 @@ const{Server} = require("socket.io");
 const mongoose=require("mongoose");
 const connnectToserver=require("./src/constrollers/socketmanager")
 const cors=require('cors')
+const user=require("./src/modles/usermodel");
+
 // connection socket with app
 const app=express();
 const server=createServer(app); //cerateServer is connecting server with app (express instance)
