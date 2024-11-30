@@ -1,8 +1,8 @@
-const { Server }=require("socket.io");
+import { Server } from "socket.io";
 
-const connnectToserver=(server)=>{
-    const io=new Server(server);
-    return io;
+const connnectToserver = (server) => {
+  const io = new Server(server);
+  return io;
+};
 
-}
-module.exports=connnectToserver
+export default connnectToserver;

@@ -1,11 +1,11 @@
-const express=require("express");
-const router=express.Router();
+import express from "express";
+import { register, login } from "../controllers/usercontroller.js";
 
-router.route("/login");
-router.route("/register");
+const router = express.Router();
+
+router.route("/login").post(login);
+router.route("/register").post(register);
 router.route("/add_to_activity");
 router.route("/get_all_activity");
 
-
-module.exports =router;
-
+export default router;
