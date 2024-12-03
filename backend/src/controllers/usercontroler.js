@@ -1,25 +1,34 @@
-import {User}from "../modles/usermodel";
+import  User from "../modles/usermodel.js";
 import httpStatus from "http-status";
 import bcrypt,{hash} from "bcrypt";
-
+import crypto from "crypto";
 
 
 const login=async(req,res)=>{
-    const{username,password}=req.body();
+    const{username,password}=req.body;
+    {console.log(username);
+    console.log(password);
+  
+    }
   if(!username || !password){
     return res.status(400).json({message:"Please provide"});
   }
+
     try{
-        const exist=await User.find(username);
-        if(!exist){
+        const user=await User.findOne({username});
+        {console.log(user.password)}
+        if(!user){
             return res.status(httpStatus.NOT_FOUND).json({message:"user not exist"});            
         }
-        
-        if(bcrypt.compare(password,User.password)){
-            const token=crypto.randomBytes(20).toStrng("hex");
-            User.token=token;
-            await User.save();
-            return res.status(httpStatus.OK).json({token:token});
+         const ismatch=await bcrypt.compare(password,user.password);
+         if (!ismatch) {
+            return res.status(httpStatus.UNAUTHORIZED).json({ message: "Incorrect password" });
+          }
+        if(ismatch){
+            const token=crypto.randomBytes(20).toString("hex");
+            user.token=token;
+            await user.save();
+            return res.status(httpStatus.OK).json({message:`login succesfully  , Token:${token}`});
 
         }
         
@@ -34,7 +43,9 @@ const register=async(req,res)=>{
     const{name,username,password}=req.body;
 
     try{
-        const existingguser=await User.find({username});
+        const existingguser=await User.findOne({username});
+        {console.log(existingguser)
+        }
         if(existingguser){
             return res.status(httpStatus.FOUND).json({message:"user already exist "});
         }
@@ -47,6 +58,7 @@ const register=async(req,res)=>{
        });
 
        await newuser.save();
+       
        res.status(httpStatus.CREATED).json({message:"User Registered"})
 
 
