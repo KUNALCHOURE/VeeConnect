@@ -1,7 +1,20 @@
-.landingpagecontainer{
+
+body, html {
+    width: 100%;
+    overflow-x: hidden; /* this is done to stop the overflow horizontaly */
+}
+
+.landingpagecontainer {
     width: 100vw;
     height: 100vh;
     background: url("./background.jpg");
     background-repeat: no-repeat;
     background-size: cover;
 }
+
+.navv {
+    width: 100vw;
+    height: 5vh;
+   
+}
+
