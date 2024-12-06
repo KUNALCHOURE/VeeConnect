@@ -15,6 +15,84 @@ body, html {
 .navv {
     width: 100vw;
     height: 5vh;
-   
+   margin-bottom: 100px;
 }
+
+
+.navbar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding-inline: 1.2rem; /* it is for left and right padding */
+    padding-block: 1.5rem;/* it is for top and bottom padding */
+    height: 140px;
+    align-items: center;
+  }
+  
+  .navheading h1 {
+    color: white;
+    font-size:2.5rem;
+    font-weight: 500;
+
+  }
+  
+  .navlist {
+    height: 140px;;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    color: white;
+    gap:1.6rem;
+    font-size: 1.5rem;
+   cursor: pointer;
+   
+  }
+  
+  .landingmaincontent{
+    color: white;
+    padding: 2.5rem;
+  }
+
+  .landingmaincontent>div:nth-child(1){
+    padding: 1rem;
+
+  }
+
+  .landingmaincontent>div:nth-child(1) h1{
+    margin-bottom: 1rem;  
+    font-size:60px; 
+  }
+
+  .landingmaincontent>div:nth-child(1) p{
+    margin-bottom: 1rem; 
+    font-size: 30px; 
+    color:grey;
+
+
+  }
+  .landingmaincontent>div:nth-child(1) button{
+    width: 140px;
+    height: 45px;
+    margin-top: 1rem;   
+    background-color: orange;
+    border-radius:  5px;
+    color: white;
+    font-weight:bold;
+    cursor: pointer;
+    border:none;
+    font-size:1.5rem;
+  }
+
+  .loginbutton{
+    border-radius: 5px;
+    background-color: orange;
+    width: 85px;
+    height: 40px;
+    color: white;
+    font-weight:bold;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 5px;
+  }
+
 
