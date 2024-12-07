@@ -15,7 +15,8 @@ export default function Landingpage() {
             <button>Get started </button>
         </div>
 
-        <div>
+        <div className='images'>
+            <img src="/mobile.png" alt="" srcset="" className='image'/>
 
         </div>
       </div>
