@@ -6,7 +6,7 @@ export default function Navbar() {
     <div className="navv">
       <nav className="navbar">
         <div className="navheading">
-          <h1>live App</h1>
+          <h1>Live Video Call</h1>
         </div>
         <div className="navlist">
            <p>Join as guest</p>
