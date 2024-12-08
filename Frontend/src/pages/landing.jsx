@@ -12,7 +12,7 @@ export default function Landingpage() {
 
             <p>Cover a Distance by apna video call </p>
             
-            <button>Get started </button>
+            {/* <button><Link to={"/auth"}>Get started</Link> </button> */}
         </div>
 
         <div className='images'>
