@@ -10,6 +10,7 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useState } from 'react';
+import { AuthContext } from '../context/authecontext';
 
 const theme = createTheme();
 
@@ -24,6 +25,27 @@ export default function SignUp() {
   const[error,seterror]=React.useState("");
   const[message,setmessage]=React.useState();
  const[open,setopen]=React.useState(false);
+
+
+const {handleregister,handlelogin}=React.useContext(AuthContext);
+ let handleAuth=async()=>{
+  try {
+    if(formstate===0){
+
+    }
+    if(formstate===1){
+      let result=await handleregister(fullname,username,password);
+      console.log(result);
+      setmessage(result);
+      setopen(true);
+    }
+  }
+   catch (error) {
+    let message=(err.response,data,message);
+    seterror(message);
+  }
+ }
+
 
   const handleSubmit = (event) => {
     event.preventDefault();

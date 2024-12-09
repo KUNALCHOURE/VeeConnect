@@ -1,6 +1,8 @@
 import React from 'react'
 import "../App.css"
 import Navbar from '../layout/navbar'
+import { Link } from 'react-router-dom';
+
 export default function Landingpage() {
   return (
     <>
@@ -12,7 +14,7 @@ export default function Landingpage() {
 
             <p>Cover a Distance by apna video call </p>
             
-            {/* <button><Link to={"/auth"}>Get started</Link> </button> */}
+            <button ><Link to={"/auth"} style={{textDecoration:'none'}}>Get started</Link> </button>
         </div>
 
         <div className='images'>
