@@ -23,7 +23,9 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (request.status === httpStatus.CREATED) {
+        console.log("registered");
         return request.data.message;
+        
       }
     } catch (error) {
       throw error;
@@ -39,7 +41,11 @@ export const AuthProvider = ({ children }) => {
           password:password,
        })
        if(request.status===httpStatus.OK){
+        console.log("logged in");
         localStorage.setItem("token",request.data.token);
+        router("/");
+        return request.data.message;
+       
 
        }
     } catch (error) {
@@ -52,7 +58,8 @@ export const AuthProvider = ({ children }) => {
   const data = {
     userData,
     setUserData,
-    handleRegister
+    handleRegister,
+    handlelogin
   };
 
   return (

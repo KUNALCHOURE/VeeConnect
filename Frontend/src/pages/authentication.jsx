@@ -11,6 +11,7 @@ import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useState } from 'react';
 import { AuthContext } from '../context/authecontext';
+import { Snackbar } from '@mui/material';
 
 const theme = createTheme();
 
@@ -21,29 +22,39 @@ export default function SignUp() {
   const[username,setusername]=React.useState("");
   const [formstate,setformstate]=React.useState(0);
   const[fullname,setfullname]=React.useState("");
-  const[password,setpassword]=React.useState();
+  const[password,setpassword]=React.useState("");
   const[error,seterror]=React.useState("");
-  const[message,setmessage]=React.useState();
+  const[message,setmessage]=React.useState("");
  const[open,setopen]=React.useState(false);
 
 
-const {handleregister,handlelogin}=React.useContext(AuthContext);
+ const { handleRegister, handlelogin } = React.useContext(AuthContext);
  let handleAuth=async()=>{
   try {
     if(formstate===0){
-
+      let result=await handlelogin(username,password);
+      console.log(result);
+      setmessage(result);
+      
+  
     }
     if(formstate===1){
-      let result=await handleregister(fullname,username,password);
+      let result=await handleRegister(fullname,username,password);
       console.log(result);
       setmessage(result);
       setopen(true);
+      setusername("");
+      seterror("");
+      setformstate(0);
+      setpassword("");
     }
   }
-   catch (error) {
-    let message=(err.response,data,message);
+  catch (error) {
+    console.log(error);
+    let message = error.response?.data?.message || "An unexpected error occurred";
     seterror(message);
   }
+  
  }
 
 
@@ -110,6 +121,7 @@ const {handleregister,handlelogin}=React.useContext(AuthContext);
                   id="UserName"
                   label="UserName"
                   autoFocus
+                  value={username}
                   onChange={(e)=>setusername(e.target.value)}
                 />
               </Grid>
@@ -122,22 +134,33 @@ const {handleregister,handlelogin}=React.useContext(AuthContext);
                   label="Password"
                   type="password"
                   id="password"
+                  value={password}
                   autoComplete="new-password"
                   onChange={(e)=>setpassword(e.target.value)}
                 />
               </Grid>
             </Grid>
+            <p style={{color:'red'}}>{error}</p>
             <Button
               type="submit"
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
+              onClick={handleAuth}
             >
-              Sign Up
+             {formstate===0 ? "Sign In": "Register"}
             </Button>
           </Box>
         </Box>
       </Container>
+
+      <Snackbar
+      open={open}
+      autoHideDuration={400}
+      message={message}
+  
+    />
+    
     </ThemeProvider>
   );
 }
