@@ -64,14 +64,65 @@ const getpermission=async()=>{
   else{
     setscreenAvailable(false);
   }
-  } catch (error) {
-  
+
+
+
+  if(videoAvailable || audioAvailabel){
+    const usermediaStream=await navigator.mediaDevices.getUserMedia({video:videoAvailable,audio:audioAvailabel});
+
+    if(usermediaStream){
+      window.localStream=usermediaStream;
+      if(localVideoRef.current){
+        localVideoRef.current.srcObject=usermediaStream;
+
+      }
+    }
   }
 }
+catch (error) {
+  console.log(err);
+}
+}
 
+let getUserMediasucces=(stream)=>{
+      
+}
+let getUserMedia=()=>{
+  if((video && videoAvailable) ||(audio && audioAvailabel)){
+    navigator.mediaDevices.getUserMedia({video:video,audio:audio})
+    .then((getUserMediasucces)=>{}) //TODO :GETUSERMEDIA SUCCESS
+    .then((stream)=>{})
+    .catch((e)=>console.log(e))
+  }
+  else{
+    try {
+       let tracks =localVideoRef.current.getTracks();
+       tracks.forEach(track=>track.stop())
+    } catch (error) {
+      
+    }
+  }
+}
+let connect=()=>{
+  setaskforusername(false);
+  getmedia();
+}
+
+
+useEffect(()=>{
+  if(video!==undefined && audio!==undefined){
+    getUserMedia()
+  }
+})
 useEffect(()=>{
   getpermission();
 },[])
+
+let getmedia=()=>{
+  setVideo(videoAvailable);
+  setAudio(audioAvailabel);
+  //ConnectToSocketServer();
+}
 
     return(
         <div>
@@ -81,7 +132,7 @@ useEffect(()=>{
              <h2>Enter into lobby </h2>
              {username}
              <TextField id="outlined-basic" label="Username" variant="outlined" value={username} onChange={(e)=>setusername(e.target.value)}   />
-             <Button variant="contained">Connect </Button>
+             <Button variant="contained"onClick={connect} >Connect </Button>
 
 
 
