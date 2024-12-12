@@ -2,8 +2,9 @@ import React, { useEffect, useRef, useState } from "react";
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
+import { io } from "socket.io-client";
 
-  const server_url="http:://localhost:8000";
+  const server_url="http://localhost:3000";
 var connections={};
 
 const peerconfigconnnections={
@@ -21,7 +22,7 @@ export default function Videomeetcomponent(){
    let [videoAvailable,setVideoAvailable]=useState(true);
    let[audioAvailabel,setaudioavailable]=useState(true);
 
-   let[video,setVideo]=useState();
+   let[video,setVideo]=useState([]);
    let[audio,setAudio]=useState();
    let[screen,setscreen]=useState();
 
@@ -85,8 +86,36 @@ catch (error) {
 }
 
 let getUserMediasucces=(stream)=>{
-      
-}
+       try{
+            window.localStream.getTracks().forEach(track=>track.stop())
+       }
+       catch(e){console.log(e)}
+
+
+       window.localStream=stream;
+       localVideoRef.current.srcObject=stream;
+       for(let id in connections){
+        if(id===socketIdRef.current) continue;
+        
+        connections[id].addStream(window.localStream)
+        connections[id].createOffer().then((description)=>{
+          connections[id].setLocalDescription(description)
+          .then(()=>{
+            socketIdRef.current.emit('signal',id,JSON.stringify({"sdp":connections[id].localDescription}))
+
+          })
+          .catch(e=>console.log(e));
+        })
+         
+       }
+
+
+      //  stream.getTracks().forEach(track=>track.onended=()=>{
+      //    setVideo(false)
+      //    setAudio(false);
+      //  })
+       }
+
 let getUserMedia=()=>{
   if((video && videoAvailable) ||(audio && audioAvailabel)){
     navigator.mediaDevices.getUserMedia({video:video,audio:audio})
@@ -113,7 +142,7 @@ useEffect(()=>{
   if(video!==undefined && audio!==undefined){
     getUserMedia()
   }
-})
+},[audio,video])
 useEffect(()=>{
   getpermission();
 },[])
@@ -121,9 +150,116 @@ useEffect(()=>{
 let getmedia=()=>{
   setVideo(videoAvailable);
   setAudio(audioAvailabel);
-  //ConnectToSocketServer();
+  ConnectToSocketServer();
 }
 
+
+let getmessagefromserver=(fromId,message)=>{
+  var signal =JSON.parse(message)
+
+  if(fromId!==socketIdRef.current ){
+    if(signal.sdp){
+      connections[fromId].setREmoteDescription(new RTCSessionDescription(signal.sdp)).then(()=>{
+        if(signal.sdp.type==='offers'){
+          connections[fromId].createAnswer().then((description)=>{
+            connections[fromId].setLocalDescription(description),then(()=>{
+              socketIdRef.current.emit('signal',fromId,JSON.stringify({"sdp":connections[fromId].localDescription}))
+            }).catch(e=>console.log(e))
+          }).catch(e=>console.log(e))
+        }
+      }).catch(e=>console.log(e))
+    }
+    if(signal.ice){
+      connections[fromId],addIceCandidate(new RTCIceCandidate(signal.ice)).catch(e=>console.log(e));
+    }
+  }
+}
+let addmessage=()=>{
+
+}
+let  ConnectToSocketServer=()=>{
+  socketRef.current=io.connect(server_url,{secure:false})
+  socketRef.current.on('signal',getmessagefromserver);
+  socketRef.current.on('connect',()=>{
+    socketRef.current.emit('join-call',window.location.href)
+    socketIdRef.current=socketRef.current.id;
+    socketRef.current.on('chat-message',addmessage)
+    socketRef.current.on('user-left',(id)=>{
+      setVideo((videos)=>videos.filter((video)=>video.socketId !==id))
+    })
+
+    socketRef.current.on('user-joined',(id,clients)=>{
+      clients.forEach((socketListId)=>{
+        connections[socketListId]=new RTCCertificate(peerconfigconnnections)
+        connections[socketListId].onicecandidate=(event)=>{
+          if(event.candidate!==null){
+            socketRef.current.emit('signal',socketListId,JSON.stringify({'ice':event.candidate}))
+          }
+        }
+
+        connections[socketListId].onaddstream=(event)=>{
+          let videoExists=videoRef.current.find(video=>video.socketId===socketListId);
+
+          if(videoExists){
+            setVideo(videos=>{
+              const updatedVideos=videos.map(video=>{
+                video.socketId===socketListId ? {...video,stream:event.stream}:video
+              })
+              videoRef.current=updateVideos;
+              return updatedVideos;
+            })
+          }
+          else{
+            let newvideo={
+              socketId:socketListId,
+              stream:event.stream,
+              autoplay:true,
+              playinline:true
+            }
+
+            setvideos(videos=>{
+              const updatedVideos=[...videos,newvideo];
+              videoRef.current=updatedVideos;
+              return updatedVideos;
+
+
+            })
+          }
+        };
+         if(window.localStream!==undefined && window.localStream!==null){
+           connections[socketListId].addStream(window.localStream);
+
+         }
+         else{
+           //let blacksilence
+
+         }
+
+      })
+
+  if(id===socketIdRef.current){
+    for(let id2 in connections){
+      if(id2=== socketIdRef.current) continue
+      try {
+         connections[id2].addStream(window.localStream)
+      } catch (error) {
+        
+      }
+      connections[id2].createOffer().then((description)=>{
+        connections[id2].setLocalDescription(description)
+        .then(()=>{
+          socketRef.current.emit('signal',id2,JSON.stringify({'sdp':connections[id2].localDescription}))
+        })
+        .catch(e=>console.log(e))
+      })
+    }
+  }
+
+
+
+    })
+  })
+}
     return(
         <div>
 
@@ -148,4 +284,4 @@ let getmedia=()=>{
           } 
         </div>
     )
-  }
+}
