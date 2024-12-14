@@ -3,6 +3,7 @@ import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import { io } from "socket.io-client";
+import { height, width } from "@mui/system";
 
   const server_url="http://localhost:3000";
 var connections={};
@@ -110,11 +111,53 @@ let getUserMediasucces=(stream)=>{
        }
 
 
-      //  stream.getTracks().forEach(track=>track.onended=()=>{
-      //    setVideo(false)
-      //    setAudio(false);
-      //  })
+       stream.getTracks().forEach(track=>track.onended=()=>{
+         setVideo(false)
+         setAudio(false);
+         try {
+           let tracks=localVideoRef.current.srcObject.getTracks()
+           tracks.forEach(track=> track.stop())
+         } catch (error) {
+          console.log(error);
+         }
+
+        for(let id in connections){
+          connections[id].addStream(window.localStream)
+          connections[id].createOffer().then((description)=>{
+            connections[id].setLocalDescription(description)
+            .then(()=>{
+              socketRef.current.emit("signal",id,JSON.stringify({"sdp":connections[id]}))
+            })
+            .catch(e=>console.log(e));
+          })
+        }
+
+        let blacksilence=(...args)=>new MediaStram([[black(...args),silence()]]);
+        window.localStream=blacksilence();
+        localVideoRef.current.srcObject=window.localStream;
+
+
+
+        })
        }
+
+
+let silence = ()=>{
+  let ctx=new AudioContext()
+  let oscillator=ctx.createOscillator();
+
+  let dst=oscillator.connect(ctx.createMediaStreamDestination());
+  oscillator.start();
+  ctx.resume()
+  return Object.assign(dst.stream.getAudioTracks()[0],{enabled:false});
+}
+
+let black=({width=640 ,height=480 }={})=>{
+  let canvas =Object.assign(document.createElement('canvas',{width,height}));
+  canvas.getContext('2d').fillRect(0,0,width,height);
+  let stream=canvas.captureStream();
+  return Object.assign(stream.getvideoTracks()[0],{enabled:false})
+}
 
 let getUserMedia=()=>{
   if((video && videoAvailable) ||(audio && audioAvailabel)){
@@ -159,7 +202,7 @@ let getmessagefromserver=(fromId,message)=>{
 
   if(fromId!==socketIdRef.current ){
     if(signal.sdp){
-      connections[fromId].setREmoteDescription(new RTCSessionDescription(signal.sdp)).then(()=>{
+      connections[fromId].setRemoteDescription(new RTCSessionDescription(signal.sdp)).then(()=>{
         if(signal.sdp.type==='offers'){
           connections[fromId].createAnswer().then((description)=>{
             connections[fromId].setLocalDescription(description),then(()=>{
@@ -231,7 +274,9 @@ let  ConnectToSocketServer=()=>{
 
          }
          else{
-           //let blacksilence
+           let blacksilence=(...args)=>new MediaStram([[black(...args),silence()]]);
+           window.localStream=blacksilence();
+           connections[socketListId].addStream(window.localStream);
 
          }
 
@@ -278,8 +323,13 @@ let  ConnectToSocketServer=()=>{
             </div>
            </div> 
           :<>
+           <video ref={localVideoRef} autoplay muted></video>
           
-          
+              {video.map((video)=>{
+                <div key={video.socketId}>
+
+                </div>
+              })}
           </>
           } 
         </div>
