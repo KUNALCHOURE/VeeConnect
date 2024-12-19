@@ -1,109 +1,121 @@
 import { Server } from "socket.io";
 
-let connections = {};
-let message = {};
+let connections = {};   //stores the connections rooms:ids of persons
+let message = {};  //stores the message in a particular room  room:message[sender ,message]
 let timeonline = {};
 
 const connnectToserver = (server) => {
-  const io = new Server(server,{
-    cors:{
-      origin:'*',
-      methods:["GET","POST"],
-      allowedHeaders:["*"],
-      credentials:true
-    }
+  const io = new Server(server, {   //instace of the server is created
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"],
+      allowedHeaders: ["*"],
+      credentials: true,
+    },
   });
 
-  io.on("connection", (socket) => {
+  io.on("connection", (socket) => {     //listen for new connections
+    console.log("A user connected:", socket.id);
 
-    console.log("something connected");
-    socket.on("join-call", (path) => {
-      if (connections[path] === undefined) {
+    // When a user joins a call
+    socket.on("join-call", (path) => {   
+      if (!connections[path]) {      //if path doesnt exist it create a new path
         connections[path] = [];
       }
-
-      connections[path].push(socket.id);
+  
+      connections[path].push(socket.id);  //Add the user in the room 
       timeonline[socket.id] = new Date();
 
-      // Notify other users in the room
-      for (let a = 0; a < connections[path].length; a++) {
-        io.to(connections[path][a]).emit("user-joined", socket.id, connections[path]);
-      }
+      // Notify all other users in the room
+      connections[path].forEach((connectedSocketId) => {
+        io.to(connectedSocketId).emit("user-joined", socket.id, connections[path]);
+      });
 
-      // Send existing messages to the new user
-      if (message[path] !== undefined) {
-        for (let a = 0; a < message[path].length; a++) {
+      // Send chat history to the new user
+      if (message[path]) {
+        message[path].forEach((msg) => {
           io.to(socket.id).emit(
             "chat-message",
-            message[path][a]["data"],
-            message[path][a]["sender"],
-            message[path][a]["socket-id-sender"]
+            msg["data"],
+            msg["sender"],
+            msg["socket-id-sender"]
           );
-        }
+        });
       }
     });
 
+    // Handle signaling for WebRTC connections
     socket.on("signal", (toid, signalMessage) => {
       io.to(toid).emit("signal", socket.id, signalMessage);
     });
 
+    // Handle chat messages
     socket.on("chat-message", (data, sender) => {
-      const [matchingRoom, found] = Object.entries(connections).reduce(
-        ([room, isFound], [roomKey, roomValue]) => {
-          if (!isFound && roomValue.includes(socket.id)) {
-            return [roomKey, true];
-          }
-          return [room, isFound];
-        },
-        ["", false]
-      );
+      let roomKey = null;
 
-      if (found) {
-        if (message[matchingRoom] === undefined) {
-          message[matchingRoom] = [];
+      // Find the room the sender is in
+      for (const [key, value] of Object.entries(connections)) {
+        if (value.includes(socket.id)) {
+          roomKey = key;
+          break;
+        }
+      }
+
+      if (roomKey) {
+        if (!message[roomKey]) {
+          message[roomKey] = [];
         }
 
-        message[matchingRoom].push({
-          sender: sender,
-          data: data,
+        message[roomKey].push({
+          sender,
+          data,
           "socket-id-sender": socket.id,
         });
 
-        console.log("message", matchingRoom, ":", sender, data);
+        console.log("Message received in room:", roomKey, data);
 
-        connections[matchingRoom].forEach((ele) => {
-          io.to(ele).emit("chat-message", data, sender, socket.id);
+        // Broadcast the message to all users in the room
+        connections[roomKey].forEach((connectedSocketId) => {
+          io.to(connectedSocketId).emit("chat-message", data, sender, socket.id);
         });
       }
     });
 
+    // Handle user disconnection
     socket.on("disconnect", () => {
-      // Handle disconnection logic here
+      let roomKey = null;
 
-      var diiftime=Math.abs(timeonline[socket.id]-new Date())
-
-      var key;
-      for(const[k,v] of JSON.parse(JSON.stringify(Object.entries(connections)))){
-        for(let a=0;a<v.length;a++){
-          if(v[a]===socket.id){
-            key=k;
-
-            for(let a=0 ;a<connections[key].length;a++){
-              io.to(connections[key][a].emit('user-left',socket.id))
-            }
-
-            var index=connections[key].indexof(socket.id);
-
-            connections[key].splice(index,1);
-
-            if(connections[key].length===0){
-              delete connections[key]
-            }
-          }
+      // Find the room the user was in
+      for (const [key, value] of Object.entries(connections)) {
+        if (value.includes(socket.id)) {
+          roomKey = key;
+          break;
         }
       }
+
+      if (roomKey) {
+        // Notify other users in the room
+        connections[roomKey].forEach((connectedSocketId) => {
+          io.to(connectedSocketId).emit("user-left", socket.id);
+        });
+
+        // Remove the user from the room
+        connections[roomKey] = connections[roomKey].filter(
+          (connectedSocketId) => connectedSocketId !== socket.id
+        );
+
+        // If the room is empty, delete it
+        if (connections[roomKey].length === 0) {
+          delete connections[roomKey];
+        }
+      }
+
+      console.log(`User ${socket.id} disconnected from room ${roomKey}`);
+      delete timeonline[socket.id];
     });
   });
+
+  return io;
 };
 
 export default connnectToserver;
