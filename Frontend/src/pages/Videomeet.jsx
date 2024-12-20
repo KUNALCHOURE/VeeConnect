@@ -96,6 +96,7 @@ let getUserMediasucces=(stream)=>{
 
        window.localStream=stream;
        localVideoRef.current.srcObject=stream;
+       
        for(let id in connections){
         if(id===socketIdRef.current) continue;
         
@@ -347,22 +348,21 @@ let  ConnectToSocketServer=()=>{
           :<>
            <video ref={localVideoRef} autoPlay muted></video>
            
-           {videos.map((video) => {
+           {videos.map((video,index) => {
   return (
     <div key={video.socketId}>
   <h2>{video.socketId}</h2>
+  {console.log(video.stream)}
   {video.stream ? (
     <video
       data-socket={video.socketId}
       ref={(ref) => {
-        if (ref) {
-          if (ref.srcObject !== video.stream) {
-            ref.srcObject = video.stream;
-          }
+        if (ref && video.stream) {  
+            ref.srcObject = video.stream;       
         }
       }}
       autoPlay
-      playsInline
+      
     ></video>
   ) : (
     <p>Waiting for stream...</p>
