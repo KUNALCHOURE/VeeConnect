@@ -1,0 +1,33 @@
+.meetjoining{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.lobbyoptions{
+   margin: 55px;
+    display: flex;
+    justify-content:space-between;
+    align-items:center;
+
+}
+
+.lobbycontent{
+    margin: 50px;
+    display: flex;
+    flex-direction: column;
+}
+.lobbycontent h2{
+    margin-bottom: 15px
+}
+
+.lobbycontent button{
+    margin-top: 15px
+}
+
+.localvideo video{
+    margin-left: 55px;
+    border-radius: 15px;
+    width: 80%;
+}
