@@ -31,3 +31,19 @@
     border-radius: 15px;
     width: 80%;
 }
+
+.meetvideocontainer{
+    
+    background-color: rgb(5, 5, 5);
+    height: 100vh;
+}
+
+.meetuservideo{
+    position: absolute;
+    bottom: 10vh;
+    right: 10vh;
+    height: 20vh;
+    width: auto;
+
+}
+

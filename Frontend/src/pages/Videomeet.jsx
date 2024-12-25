@@ -3,7 +3,7 @@ import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import { io } from "socket.io-client";
-import '../styles/videomeetstyle.css'
+import '../styles/videomeetstyle.css';
 const server_url="http://localhost:3000";
 var connections={};
 
@@ -283,8 +283,8 @@ export default function Videomeetcomponent(){
   }
 
   return(
-  
-      <div className="meetjoining">
+  <>    
+    
         
       {askforusername===true?
       <div className="lobbyoptions">
@@ -299,9 +299,11 @@ export default function Videomeetcomponent(){
           <video ref={localVideoRef} autoPlay muted></video>
         </div>
       </div>
+      
+    
       :
-      <>
-        <video ref={localVideoRef} autoPlay muted></video>
+      <div className="meetvideocontainer">
+        <video ref={localVideoRef} autoPlay muted className="meetuservideo">  </video>
         {videos.map((video, index) => (
           <div key={video.socketId}>
             <h2>{video.socketId}</h2>
@@ -323,10 +325,11 @@ export default function Videomeetcomponent(){
             )}
           </div>
         ))}
-      </>
+      </div>
       }
       
-      </div> 
+      </>
+
    
   )
 }
