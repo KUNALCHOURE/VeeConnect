@@ -4,6 +4,17 @@ import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import { io } from "socket.io-client";
 import '../styles/videomeetstyle.css';
+import VideocamIcon from '@mui/icons-material/Videocam';
+import VideocamOffIcon from '@mui/icons-material/VideocamOff';
+import { IconButton } from "@mui/material";
+import MicIcon from '@mui/icons-material/Mic';
+import PresentToAllIcon from '@mui/icons-material/PresentToAll';
+import BackHandIcon from '@mui/icons-material/BackHand';
+import CallEndIcon from '@mui/icons-material/CallEnd';
+import MicOffIcon from '@mui/icons-material/MicOff';
+import CancelPresentationIcon from '@mui/icons-material/CancelPresentation';
+
+
 const server_url="http://localhost:3000";
 var connections={};
 
@@ -39,6 +50,8 @@ export default function Videomeetcomponent(){
 
   let[videos,setvideos]=useState([]);
 
+
+   let[clicked,setclicked]=useState(false);
   const getpermission=async()=>{
     try {
       const videopermission=navigator.mediaDevices.getUserMedia({video:true})
@@ -281,6 +294,9 @@ export default function Videomeetcomponent(){
       })
     })
   }
+  let handleclick=(e)=>{
+      setclicked((prevstate)=>!prevstate);
+  }
 
   return(
   <>    
@@ -303,9 +319,13 @@ export default function Videomeetcomponent(){
     
       :
       <div className="meetvideocontainer">
+
+        
+
+
         <video ref={localVideoRef} autoPlay muted className="meetuservideo">  </video>
         {videos.map((video, index) => (
-          <div key={video.socketId}>
+          <div key={video.socketId} className="othervideo">
             <h2>{video.socketId}</h2>
             {console.log(`Stream for ${video.socketId}:`, video.stream)}
             {video.stream ? (
@@ -325,6 +345,26 @@ export default function Videomeetcomponent(){
             )}
           </div>
         ))}
+
+<div className="buttoncontainers">
+  <IconButton className="icon-button">
+    {(video === true) ? <VideocamIcon /> : <VideocamOffIcon />}
+  </IconButton>
+  <IconButton className="icon-button">
+    {(audio===true)?<MicIcon /> : <MicOffIcon/>}
+  </IconButton>
+  <IconButton className="icon-button">
+    {(screen===true)?<PresentToAllIcon />:<CancelPresentationIcon/>} 
+  </IconButton>
+  <IconButton className={`icon-button ${clicked ? "handraised" :"handnotraised"}`}>
+    <BackHandIcon  onClick={handleclick}/>
+  </IconButton>
+
+  <IconButton className="icon-button" style={{backgroundColor:"red"}}>
+     <CallEndIcon/>
+  </IconButton>
+</div>
+
       </div>
       }
       

@@ -33,17 +33,60 @@
 }
 
 .meetvideocontainer{
-    
-    background-color: rgb(5, 5, 5);
+    background-color: rgb(23, 23, 23);
     height: 100vh;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+   
 }
 
 .meetuservideo{
     position: absolute;
-    bottom: 10vh;
+    bottom: 15vh;
     right: 10vh;
     height: 20vh;
     width: auto;
-
+    border-radius: 15px;
 }
 
+.othervideo video{
+  
+    height: 20vh;
+    width: 50vh;
+    margin: 15px;
+}
+
+.buttoncontainers{
+    display: flex;
+    justify-content:space-evenly;
+    align-items: center;
+    position: absolute;
+    width: 100vw;
+    bottom: 0;
+    text-align: center;
+    background-color: gray;
+    height: 75px;
+}
+
+.buttoncontainers .icon-button {
+    color: white;
+    border-radius: 20px;
+    
+    font-size: 50px !important;
+  }
+  
+
+  .buttoncontainers .icon-button svg{  /* svg are the elements like  <VideocamIcon /> <MicIcon /> they 
+                                         are not the regular div or span so to style them we have to
+                                           add svg*/
+    font-size: 35px;
+  }
+  .buttoncontainers .handraised {
+    background-color: white;
+    color: black;
+  }
+
+  .buttoncontainers .handraised:hover {
+     background-color: white;
+  }
