@@ -35,9 +35,9 @@
 .meetvideocontainer{
     background-color: rgb(23, 23, 23);
     height: 100vh;
-    display: flex;
+    /* display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: wrap; */
    
 }
 
@@ -50,12 +50,21 @@
     border-radius: 15px;
 }
 
-.othervideo video{
-  
-    height: 20vh;
-    width: 50vh;
-    margin: 15px;
+.othervideos{
+    display: flex;
+    flex-wrap: wrap;
+    padding: 10px;
 }
+.othervideos .othervideo video{
+    height: 40vh;
+    width: 40vh;
+    margin: 15px;
+    border-radius: 10px;
+    gap: 10px;
+}
+
+
+
 
 .buttoncontainers{
     display: flex;
@@ -82,11 +91,11 @@
                                            add svg*/
     font-size: 35px;
   }
-  .buttoncontainers .handraised {
+  .buttoncontainers .handraised  ,  .buttoncontainers .videooff ,.buttoncontainers .micoff{
     background-color: white;
     color: black;
   }
-
-  .buttoncontainers .handraised:hover {
+ /* sab mai hover lagan pada kyuki akhri mai lagaya toh sirf akhri wale mai hi lagega */
+  .buttoncontainers .handraised:hover,  .buttoncontainers .videooff:hover ,.buttoncontainers .micoff:hover{
      background-color: white;
   }

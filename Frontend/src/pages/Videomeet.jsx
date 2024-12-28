@@ -6,14 +6,14 @@ import { io } from "socket.io-client";
 import '../styles/videomeetstyle.css';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff';
-import { IconButton } from "@mui/material";
+import { Badge, IconButton } from "@mui/material";
 import MicIcon from '@mui/icons-material/Mic';
 import PresentToAllIcon from '@mui/icons-material/PresentToAll';
 import BackHandIcon from '@mui/icons-material/BackHand';
 import CallEndIcon from '@mui/icons-material/CallEnd';
 import MicOffIcon from '@mui/icons-material/MicOff';
 import CancelPresentationIcon from '@mui/icons-material/CancelPresentation';
-
+import ChatIcon from '@mui/icons-material/Chat';
 
 const server_url="http://localhost:3000";
 var connections={};
@@ -298,6 +298,15 @@ export default function Videomeetcomponent(){
       setclicked((prevstate)=>!prevstate);
   }
 
+  let handlevideoclick=(e)=>{
+      setVideo((prevstate)=>!prevstate);
+
+  }
+
+  let handlemicclick=(e)=>{
+    setAudio((prevstate)=>!prevstate);
+}
+
   return(
   <>    
     
@@ -324,9 +333,10 @@ export default function Videomeetcomponent(){
 
 
         <video ref={localVideoRef} autoPlay muted className="meetuservideo">  </video>
+       <div className="othervideos">
         {videos.map((video, index) => (
-          <div key={video.socketId} className="othervideo">
-            <h2>{video.socketId}</h2>
+          <div key={video.socketId}  className="othervideo">
+            {/* <h2>{video.socketId}</h2> */}
             {console.log(`Stream for ${video.socketId}:`, video.stream)}
             {video.stream ? (
               <video
@@ -345,12 +355,13 @@ export default function Videomeetcomponent(){
             )}
           </div>
         ))}
+        </div>
 
 <div className="buttoncontainers">
-  <IconButton className="icon-button">
+  <IconButton className={`icon-button ${video ? "videoon" : "videooff"}`} onClick={handlevideoclick}>
     {(video === true) ? <VideocamIcon /> : <VideocamOffIcon />}
   </IconButton>
-  <IconButton className="icon-button">
+  <IconButton className={`icon-button ${audio ? "micon" : "micoff"}`} onClick={handlemicclick}>
     {(audio===true)?<MicIcon /> : <MicOffIcon/>}
   </IconButton>
   <IconButton className="icon-button">
@@ -363,6 +374,12 @@ export default function Videomeetcomponent(){
   <IconButton className="icon-button" style={{backgroundColor:"red"}}>
      <CallEndIcon/>
   </IconButton>
+
+  <Badge badgeContent={newMessages} color="secondary">
+    <IconButton className="icon-button">
+    <ChatIcon/> 
+    </IconButton>
+  </Badge>
 </div>
 
       </div>
