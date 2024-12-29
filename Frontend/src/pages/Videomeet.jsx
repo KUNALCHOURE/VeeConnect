@@ -14,7 +14,7 @@ import CallEndIcon from '@mui/icons-material/CallEnd';
 import MicOffIcon from '@mui/icons-material/MicOff';
 import CancelPresentationIcon from '@mui/icons-material/CancelPresentation';
 import ChatIcon from '@mui/icons-material/Chat';
-
+import {useNavigate}from 'react-router-dom'
 const server_url="http://localhost:3000";
 var connections={};
 
@@ -36,7 +36,7 @@ export default function Videomeetcomponent(){
 
   let[video,setVideo]=useState([]);
   let[audio,setAudio]=useState();
-  let[screen,setscreen]=useState();
+  let[screen,setscreen]=useState(false);
 
   let[showmodel,setmodel]=useState();
   let[screenAvailable,setscreenAvailable]=useState();
@@ -49,9 +49,10 @@ export default function Videomeetcomponent(){
   let[username,setusername]=useState("");
 
   let[videos,setvideos]=useState([]);
-
-
    let[clicked,setclicked]=useState(false);
+let[chat,setchat]=useState(false);
+
+
   const getpermission=async()=>{
     try {
       const videopermission=navigator.mediaDevices.getUserMedia({video:true})
@@ -307,6 +308,77 @@ export default function Videomeetcomponent(){
     setAudio((prevstate)=>!prevstate);
 }
 
+let getDisplayMediaSucess=(stream)=>{
+  try {
+     window.localStream.getTracks().forEach(track=>track.stop())
+  } catch (error) {
+    console.log(error);
+  }
+
+  window.localStream=stream;
+  localVideoRef.current.srcObject=stream;
+
+  for(let id in connections){
+    if(id===socketIdRef.current) continue;
+
+    connections[id].addStream(window.localStream)
+    connections[id].createOffer().then((description)=>{
+      connections[id].setLocalDescription(description)
+      .then(()=>{
+        socketRef.current.emit("signal",id,JSON.stringify({"sdp":connections[id].localDescription}))
+      })
+      .catch(e=> console.log(e))
+    })
+  }
+  
+  stream.getTracks().forEach(track=>track.onended=()=>{
+    setscreen(false);
+    try {
+      let tracks=localVideoRef.current.srcObject.getTracks()
+      tracks.forEach(track=> track.stop())
+    } catch (error) {
+      console.log(error);
+    }
+getUserMedia();
+
+
+    let blacksilence=(...args)=>new MediaStream([black(...args),silence()]);
+    window.localStream=blacksilence();
+    localVideoRef.current.srcObject=window.localStream;
+  })
+}
+
+
+
+let getDisplayMedia =()=>{
+  if(screen){
+    if(navigator.mediaDevices.getDisplayMedia){
+      navigator.mediaDevices.getDisplayMedia({video:true,audio:true})
+      .then(getDisplayMediaSucess)
+      .then((stream)=>{ })
+      .catch((e)=>console.log(e));
+    }
+  }
+}
+useEffect(()=>{
+  if(screen !== undefined){
+    getDisplayMedia();
+  }
+},[screen])
+
+let handlescreen=()=>{
+  setscreen((prevstate)=>!prevstate);
+  console.log(screen);
+}
+
+let handlechat=()=>{
+       setchat((prevstate)=>!prevstate)
+}
+
+let navigate=useNavigate();
+let handleend=()=>{
+    navigate("/");
+}
   return(
   <>    
     
@@ -328,10 +400,6 @@ export default function Videomeetcomponent(){
     
       :
       <div className="meetvideocontainer">
-
-        
-
-
         <video ref={localVideoRef} autoPlay muted className="meetuservideo">  </video>
        <div className="othervideos">
         {videos.map((video, index) => (
@@ -364,23 +432,36 @@ export default function Videomeetcomponent(){
   <IconButton className={`icon-button ${audio ? "micon" : "micoff"}`} onClick={handlemicclick}>
     {(audio===true)?<MicIcon /> : <MicOffIcon/>}
   </IconButton>
-  <IconButton className="icon-button">
-    {(screen===true)?<PresentToAllIcon />:<CancelPresentationIcon/>} 
-  </IconButton>
+  {screenAvailable===true?
+  <IconButton onClick={handlescreen} className="icon-button">
+    {(screen===false)?<PresentToAllIcon />:<CancelPresentationIcon/>} 
+  </IconButton>:<></>
+
+}
   <IconButton className={`icon-button ${clicked ? "handraised" :"handnotraised"}`}>
     <BackHandIcon  onClick={handleclick}/>
   </IconButton>
 
   <IconButton className="icon-button" style={{backgroundColor:"red"}}>
-     <CallEndIcon/>
+     <CallEndIcon onClick={handleend}/>
   </IconButton>
 
   <Badge badgeContent={newMessages} color="secondary">
-    <IconButton className="icon-button">
+    <IconButton className={`icon-button ${chat ? "chaton" :"chatoff"}`} onClick={handlechat}>
     <ChatIcon/> 
     </IconButton>
   </Badge>
 </div>
+
+  {(chat===true)? <div className="chatbox">
+      <h1 style={{textAlign:'center'}}>messages </h1>
+        {messages.map((message)=>
+          console.log(message)
+        )}
+
+     
+  </div>:
+  <></>}
 
       </div>
       }

@@ -44,7 +44,7 @@
 .meetuservideo{
     position: absolute;
     bottom: 15vh;
-    right: 10vh;
+    left: 10vh;
     height: 20vh;
     width: auto;
     border-radius: 15px;
@@ -62,9 +62,6 @@
     border-radius: 10px;
     gap: 10px;
 }
-
-
-
 
 .buttoncontainers{
     display: flex;
@@ -91,11 +88,21 @@
                                            add svg*/
     font-size: 35px;
   }
-  .buttoncontainers .handraised  ,  .buttoncontainers .videooff ,.buttoncontainers .micoff{
+  .buttoncontainers .handraised  ,  .buttoncontainers .videooff ,.buttoncontainers .micoff ,.buttoncontainers .chaton{
     background-color: white;
     color: black;
   }
  /* sab mai hover lagan pada kyuki akhri mai lagaya toh sirf akhri wale mai hi lagega */
-  .buttoncontainers .handraised:hover,  .buttoncontainers .videooff:hover ,.buttoncontainers .micoff:hover{
+  .buttoncontainers .handraised:hover,  .buttoncontainers .videooff:hover ,.buttoncontainers .micoff:hover ,.buttoncontainers .chaton:hover{
      background-color: white;
   }
+
+.chatbox{
+    position: absolute;
+    right: 5vh;
+    background-color: white;
+    height: 60vh;
+    width: 18vw;
+    bottom: 15vh;
+    border-radius: 15px;
+}
