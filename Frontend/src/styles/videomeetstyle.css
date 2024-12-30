@@ -101,8 +101,43 @@
     position: absolute;
     right: 5vh;
     background-color: white;
-    height: 60vh;
-    width: 18vw;
-    bottom: 15vh;
+    height: 85vh;
+    width: 20vw;
+    bottom:13vh;
     border-radius: 15px;
+    text-align: center;
+}
+
+.chatcontainer{
+    position: relative;
+    height: 100%;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+   
+}
+.chattingarea {
+    display: flex;
+    position: absolute;
+    bottom:10px;
+    border: 1px solid black;
+    border-radius: 10px;
+    justify-content: center;
+
+}
+.chattingarea button{
+    background-color: rgb(17, 160, 236);
+    color: white;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+
+}
+
+.text .MuiOutlinedInput-root{
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+}
+.chattingdisplay{
+      height:80%;
+      text-align: left;
 }

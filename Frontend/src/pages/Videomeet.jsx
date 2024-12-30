@@ -215,7 +215,16 @@ let[chat,setchat]=useState(false);
       }
     }
   }
-  let addmessage=()=>{}
+  let addmessage = (data, sender, socketIdSender) => {
+    setmessages((prevMessages) => [
+      ...prevMessages,
+      { sender: sender, data: data }
+    ]);
+  
+    if (socketIdSender !== socketIdRef.current) {
+      setnewMessages((prevNewMessages) => prevNewMessages + 1);
+    }
+  };
 
   let  ConnectToSocketServer=()=>{
     socketRef.current=io.connect(server_url,{secure:false})
@@ -377,7 +386,19 @@ let handlechat=()=>{
 
 let navigate=useNavigate();
 let handleend=()=>{
-    navigate("/");
+  try{
+    let tracks=localVideoRef.current.srcObject.getTracks();
+    tracks.forEach(track=>track.stop());
+  }
+  catch(e){
+     }
+     navigate("/")
+}
+
+
+let sendmessages=()=>{
+ socketRef.current.emit("chat-message",message,username)
+ setmessage("");
 }
   return(
   <>    
@@ -454,10 +475,31 @@ let handleend=()=>{
 </div>
 
   {(chat===true)? <div className="chatbox">
+
+    <div className="chatcontainer">
+      
       <h1 style={{textAlign:'center'}}>messages </h1>
-        {messages.map((message)=>
-          console.log(message)
-        )}
+      
+  
+  <div className="chattingdisplay">
+    {messages.map((item,index)=>{
+       return(
+        <div key={index} className="chats" style={{marginBottom:"20px"}}>
+          <p><b>{item.sender}</b> &nbsp;&nbsp;&nbsp; {} </p>
+           <p>{item.data}</p>
+        </div>
+       )
+    })}
+  </div>
+
+
+<div className="chattingarea">
+ 
+<TextField  value={message} onChange={(e)=>setmessage(e.target.value)}  id="filled-basic" label="Enter Message " className="text" />
+  <Button className="send" onClick={sendmessages}>Send</Button>
+  </div>
+    
+    </div>
 
      
   </div>:
