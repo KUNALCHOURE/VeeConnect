@@ -2,6 +2,7 @@ import  User from "../modles/usermodel.js";
 import httpStatus from "http-status";
 import bcrypt,{hash} from "bcrypt";
 import crypto from "crypto";
+import meeting from "../modles/meetingmodel.js";
 
 
 const login=async(req,res)=>{
@@ -68,5 +69,19 @@ const register=async(req,res)=>{
          res.json({message: `Something went wrong: ${e}`});
     }
 }
+
+// const getuserhistory=async(req,res)=>{
+//     const{token}=req.query;
+//     try{
+//         const user =await User.findOne({token:token})
+//         const meet=await meeting.find({user_id:user.username})
+//         res.json(meeting)
+//     }
+//     catch(e){
+//           res.json({message:`something went wrong ${e}`})
+//     }
+// }
+
+
 
 export {register,login};

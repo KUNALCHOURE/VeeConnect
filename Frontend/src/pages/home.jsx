@@ -1,11 +1,60 @@
-import React from 'react'
-import withAuth from '../../../backend/utils/authcomponent'
+import React, { useState } from 'react'
+import withAuth from '../utils/withauth';
+import { useNavigate } from 'react-router-dom';
+import Navbar from '../layout/navbar';
+import { Button, IconButton, TextField } from '@mui/material';
+import HistoryIcon from '@mui/icons-material/History';
+import '../styles/home.css'
 
  function Homecomponent() {
+let navigate=useNavigate();
+const [meetingcode,setmeetingcode]=useState("");
+  let handlejoincall=()=>{
+    
+      navigate(`/${meetingcode}`);
+
+      
+  }
   return (
-    <div>
-    <h2>this is home </h2>
+   <>
+   <div className="navv">
+      <nav className="navbar">
+        <div className="navheading">
+          <h1 style={{color:"black"}}>Live Video Call</h1>
+        </div>
+        <div className="navlist">
+          <div className="history" style={{display:"flex"}}>
+          <IconButton>
+              <HistoryIcon></HistoryIcon>
+              <p>History</p>
+          </IconButton>
+         
+        
+          </div>
+           <Button className='loginbutton' onClick={()=>navigate("/auth")} >Login</Button>
+        </div>
+      </nav>
     </div>
+    
+    <div className="meet">
+        <div className="left">
+          <h2>Providing Quality video calls </h2>
+         <div className="meetingcode">
+          <h2>Meeting code:</h2>
+          <TextField variant='outlined' value={meetingcode} onChange={(e)=>{setmeetingcode(e.target.value)}}></TextField>
+           <Button onClick={handlejoincall}>Join</Button>
+          </div>
+        </div>
+
+        <div className="right">
+          <img src="/mobile.png" alt="" />
+        </div>
+    </div>
+
+
+   
+   
+   </>
   )
 }
 

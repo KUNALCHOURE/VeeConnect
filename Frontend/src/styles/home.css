@@ -1,0 +1,18 @@
+.meet{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 150px;
+}
+
+.left{
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.meetingcode{
+    display:flex;
+    justify-content: center;
+    margin-top: 25px;
+    align-items: center;
+}
