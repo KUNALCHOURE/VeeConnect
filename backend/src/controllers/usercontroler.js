@@ -70,18 +70,40 @@ const register=async(req,res)=>{
     }
 }
 
-// const getuserhistory=async(req,res)=>{
-//     const{token}=req.query;
-//     try{
-//         const user =await User.findOne({token:token})
-//         const meet=await meeting.find({user_id:user.username})
-//         res.json(meeting)
-//     }
-//     catch(e){
-//           res.json({message:`something went wrong ${e}`})
-//     }
-// }
+const getuserhistory=async(req,res)=>{
+    const{token}=req.query;
+    try{
+        const user =await User.findOne({token:token})
+        const meet=await meeting.find({user_id:user.username})
+        res.json(meeting)
+    }
+    catch(e){
+          res.json({message:`something went wrong ${e}`})
+    }
+}
+
+
+const addtohistory=async(req,res)=>{
+ const{token,meeting_code}=req.body;
+
+ try{
+    const user=await User.findOne({token:token});
+    const newmeeting=new meeting({
+        user_id:username,
+        meeting_id:meeting_code
+    });
+
+    await newmeeting.save();
+    res.status(httpStatus.CREATED).json({message:"Added the code to the history "})
+
+ }
+ catch(e){
+    res.json({message:`Something wrong occured ${e}`})
+
+ }
+}
 
 
 
-export {register,login};
+
+export {register,login,addtohistory,getuserhistory};
