@@ -173,7 +173,8 @@ let[chat,setchat]=useState(false);
     }
   };
 
-  let connect=()=>{
+  let connect=(e)=>{
+    e.preventDefault();
     setaskforusername(false);
     getmedia();
   }
@@ -385,16 +386,34 @@ let handlechat=()=>{
 }
 
 let navigate=useNavigate();
-let handleend=()=>{
-  try{
-    let tracks=localVideoRef.current.srcObject.getTracks();
-    tracks.forEach(track=>track.stop());
-  }
-  catch(e){
-     }
-     navigate("/")
-}
+let handleend = () => {
+  try {
+    // Stop all media tracks
+    const tracks = localVideoRef.current?.srcObject?.getTracks();
+    if (tracks) {
+      tracks.forEach((track) => track.stop());
+    }
 
+    // Close all peer connections
+    for (let id in connections) {
+      connections[id].close();
+      delete connections[id];
+    }
+
+    // Disconnect from the socket server
+    socketRef.current.disconnect();
+
+    // Clear the video elements
+    localVideoRef.current.srcObject = null;
+    setvideos([]);
+
+  } catch (error) {
+    console.error("Error cleaning up media and connections:", error);
+  }
+
+  // Navigate away
+  navigate("/home");
+};
 
 let sendmessages=()=>{
  socketRef.current.emit("chat-message",message,username)
@@ -407,11 +426,13 @@ let sendmessages=()=>{
       {askforusername===true?
       <div className="lobbyoptions">
         <div className="lobbycontent" style={{margin:'17px'}}>
+          <form action="" onSubmit={connect}>
         <h2 style={{textAlign:'center'}}>Enter into lobby </h2>
        
         <TextField id="outlined-basic" label="Username" variant="outlined" value={username} onChange={(e)=>setusername(e.target.value)} />
 
         <Button variant="contained"onClick={connect} >Connect </Button>
+        </form>
         </div>
         <div className="localvideo">
           <video ref={localVideoRef} autoPlay muted></video>
@@ -485,7 +506,7 @@ let sendmessages=()=>{
     {messages.map((item,index)=>{
        return(
         <div key={index} className="chats" style={{marginBottom:"20px"}}>
-          <p><b>{item.sender}</b> &nbsp;&nbsp;&nbsp; {} </p>
+          <p><b>{item.sender}</b> &nbsp;&nbsp;&nbsp;</p>
            <p>{item.data}</p>
         </div>
        )

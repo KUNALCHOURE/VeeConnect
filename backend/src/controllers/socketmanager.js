@@ -84,6 +84,7 @@ const connnectToserver = (server) => {
     // Handle user disconnection
     socket.on("disconnect", () => {
       let roomKey = null;
+      console.log("called");
 
       // Find the room the user was in
       for (const [key, value] of Object.entries(connections)) {
@@ -96,7 +97,9 @@ const connnectToserver = (server) => {
       if (roomKey) {
         // Notify other users in the room
         connections[roomKey].forEach((connectedSocketId) => {
-          io.to(connectedSocketId).emit("user-left", socket.id);
+          if (connectedSocketId !== socket.id) {
+            io.to(connectedSocketId).emit("user-left", socket.id);
+          }
         });
 
         // Remove the user from the room
@@ -111,7 +114,7 @@ const connnectToserver = (server) => {
       }
 
       console.log(`User ${socket.id} disconnected from room ${roomKey}`);
-      delete timeonline[socket.id];
+      delete timeonline[socket.id]; // Clean up user-specific data
     });
   });
 
