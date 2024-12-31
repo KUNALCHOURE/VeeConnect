@@ -19,6 +19,10 @@ const {addtouserhistory}=useContext(AuthContext);
     navigate(`/${meetingcode}`);
      
   }
+
+  let handlehistory=()=>{
+    navigate(`/history`);
+  }
   return (
    <>
    <div className="navv">
@@ -28,7 +32,7 @@ const {addtouserhistory}=useContext(AuthContext);
         </div>
         <div className="navlist">
           <div className="history" style={{display:"flex"}}>
-          <IconButton>
+          <IconButton onClick={handlehistory}>
               <HistoryIcon></HistoryIcon>
               <p>History</p>
           </IconButton>

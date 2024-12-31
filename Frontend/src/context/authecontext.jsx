@@ -10,7 +10,7 @@ const client = axios.create({
 });
 
 export const AuthProvider = ({ children }) => {
-    const [userData, setUserData] = useState(null);
+    const [userData, setUserData] = useState();
     const router = useNavigate();
 
     const handleRegister = async (name, username, password) => {
@@ -46,7 +46,9 @@ export const AuthProvider = ({ children }) => {
                     token: localStorage.getItem("token"),
                 },
             });
+            console.log(req);
             return req.data;
+            
         } catch (error) {
             throw error;
         }
