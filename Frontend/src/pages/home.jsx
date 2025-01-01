@@ -20,9 +20,7 @@ const {addtouserhistory}=useContext(AuthContext);
      
   }
 
-  let handlehistory=()=>{
-    navigate(`/history`);
-  }
+ 
   return (
    <>
    <div className="navv">
@@ -30,17 +28,7 @@ const {addtouserhistory}=useContext(AuthContext);
         <div className="navheading">
           <h1 style={{color:"black"}}>Live Video Call</h1>
         </div>
-        <div className="navlist">
-          <div className="history" style={{display:"flex"}}>
-          <IconButton onClick={handlehistory}>
-              <HistoryIcon></HistoryIcon>
-              <p>History</p>
-          </IconButton>
-         
         
-          </div>
-           <Button className='loginbutton' onClick={()=>navigate("/auth")} >Login</Button>
-        </div>
       </nav>
     </div>
     

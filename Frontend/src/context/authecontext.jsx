@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }) => {
             const request = await client.post("/register", { name, username, password });
             if (request.status === httpStatus.CREATED) {
                 console.log("registered");
+                router("/home");
                 return request.data.message;
             }
         } catch (error) {
@@ -31,7 +32,7 @@ export const AuthProvider = ({ children }) => {
             if (request.status === httpStatus.OK) {
                 console.log("logged in");
                 localStorage.setItem("token", request.data.token);
-                router("/");
+                router("/home",);
                 return request.data.message;
             }
         } catch (error) {

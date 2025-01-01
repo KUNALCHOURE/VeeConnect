@@ -55,8 +55,8 @@ let navigate=useNavigate();
     </div>
 
     <div className="historyofuser">
-      {meeting.map((meet)=>{
-          <Card sx={{ minWidth: 275 }}>
+      {meeting.map((meet,i)=>{
+          <Card key={i}  sx={{ minWidth: 275 }}>
           <CardContent>
             <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>
               History

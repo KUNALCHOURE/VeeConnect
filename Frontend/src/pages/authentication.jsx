@@ -36,6 +36,7 @@ export default function SignUp() {
       console.log(result);
       setmessage(result);
       
+      
   
     }
     if(formstate===1){
