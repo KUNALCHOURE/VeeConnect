@@ -46,7 +46,7 @@ export default function Videomeetcomponent(){
   let[newMessages,setnewMessages]=useState(0);
 
   let[askforusername,setaskforusername]=useState(true);
-  let[username,setusername]=useState("");
+  let[username,setusername]=useState();
 
   let[videos,setvideos]=useState([]);
    let[clicked,setclicked]=useState(false);
@@ -428,10 +428,10 @@ let sendmessages=()=>{
         <div className="lobbycontent" style={{margin:'17px'}}>
           <form action="" onSubmit={connect}>
         <h2 style={{textAlign:'center'}}>Enter into lobby </h2>
-       
-        <TextField id="outlined-basic" label="Username" variant="outlined" value={username} onChange={(e)=>setusername(e.target.value)} />
+      
+      <TextField required id="outlined-basic" label="Username" variant="outlined" value={username} onChange={(e)=>setusername(e.target.value)}  />
 
-        <Button variant="contained"onClick={connect} >Connect </Button>
+        <Button variant="contained" >Connect </Button>
         </form>
         </div>
         <div className="localvideo">

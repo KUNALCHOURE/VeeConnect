@@ -7,7 +7,7 @@ body, html {
 .landingpagecontainer {
     width: 100vw;
     height: 100vh;
-    background: url("./background.jpg");
+    background: url("./background.png");
     background-repeat: no-repeat;
     background-size: cover;
 }
