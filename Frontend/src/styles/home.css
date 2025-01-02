@@ -1,3 +1,8 @@
+.homepage{
+    width: 100vw;
+    height: 100vh;
+}
+
 .meet{
     display: flex;
     justify-content: center;

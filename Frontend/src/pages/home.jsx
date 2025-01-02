@@ -22,7 +22,7 @@ const {addtouserhistory}=useContext(AuthContext);
 
  
   return (
-   <>
+   <div className='homepage'>
    <div className="navv">
       <nav className="navbar">
         <div className="navheading">
@@ -50,7 +50,7 @@ const {addtouserhistory}=useContext(AuthContext);
 
    
    
-   </>
+   </div>
   )
 }
 

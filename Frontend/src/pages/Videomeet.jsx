@@ -431,7 +431,7 @@ let sendmessages=()=>{
       
       <TextField required id="outlined-basic" label="Username" variant="outlined" value={username} onChange={(e)=>setusername(e.target.value)}  />
 
-        <Button variant="contained" >Connect </Button>
+        <Button variant="contained" type="submit">Connect </Button>
         </form>
         </div>
         <div className="localvideo">
