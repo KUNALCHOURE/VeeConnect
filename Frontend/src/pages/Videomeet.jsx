@@ -499,7 +499,7 @@ let sendmessages=()=>{
 
     <div className="chatcontainer">
       
-      <h1 style={{textAlign:'center'}}>messages </h1>
+      <h1 style={{textAlign:'center'}}>Chats</h1>
       
   
   <div className="chattingdisplay">
