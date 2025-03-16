@@ -3,9 +3,9 @@ import httpStatus from "http-status";
 import bcrypt,{hash} from "bcrypt";
 import crypto from "crypto";
 import meeting from "../modles/meetingmodel.js";
+import asynchandler from "../../utils/asynchandler.js";
 
-
-const login=async(req,res)=>{
+const login=asynchandler(async(req,res)=>{
     const{username,password}=req.body;
     {console.log(username);
     console.log(password);
@@ -38,9 +38,9 @@ const login=async(req,res)=>{
          return res.status(500).json({message:"Something went wrong "});
     }
 
-}
+});
 
-const register=async(req,res)=>{
+const register=asynchandler(async(req,res)=>{
     const{name,username,password}=req.body;
 
     try{
@@ -68,9 +68,9 @@ const register=async(req,res)=>{
     catch(e){
          res.json({message: `Something went wrong: ${e}`});
     }
-}
+});
 
-const getuserhistory=async(req,res)=>{
+const getuserhistory=asynchandler(async(req,res)=>{
     const{token}=req.query;
     try{
         const user =await User.findOne({token:token})
@@ -80,10 +80,10 @@ const getuserhistory=async(req,res)=>{
     catch(e){
           res.json({message:`something went wrong ${e}`})
     }
-}
+});
 
 
-const addtohistory=async(req,res)=>{
+const addtohistory=asynchandler(async(req,res)=>{
  const{token,meeting_code}=req.body;
 
  try{
@@ -101,7 +101,7 @@ const addtohistory=async(req,res)=>{
     res.json({message:`Something wrong occured ${e}`})
 
  }
-}
+});
 
 
 

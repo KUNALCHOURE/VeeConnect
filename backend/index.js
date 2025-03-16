@@ -18,9 +18,6 @@ app.use(cors());
 
 app.use("/api/v1/users",userroute);
 
-app.get("/", (req, res) => {
-  res.send("working");
-});
 
 
 
@@ -35,3 +32,25 @@ const start = async () => {
 };
 
 start();
+
+app.use((err, req, res, next) => {
+  if (err instanceof Apierror) {
+      return res.status(err.statuscode).json({
+          success: false,
+          status: err.statuscode,
+          message: err.message || "An error occurred",
+          errors: err.errors || [],
+      });
+  }
+
+  res.status(500).json({
+      success: false,
+      status: 500,
+      message: "Something went wrong",
+      errors: [],
+  });
+});
+
+app.get("/", (req, res) => {
+  res.send("working");
+});
