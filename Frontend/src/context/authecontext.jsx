@@ -5,7 +5,7 @@ import axios from 'axios';
 
 export const AuthContext = createContext({});
 
-const client = axios.create({
+const api = axios.create({
     baseURL: "http://localhost:3000/api/v1/users",
     withCredentials:true,
 });
@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
 
     const handleRegister = async (name, username, password) => {
         try {
-            const request = await client.post("/register", { name, username, password });
+            const request = await api.post("/register", { name, username, password });
             if (request.status === httpStatus.CREATED) {
                 console.log("registered");
                 router("/home");
@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
 
     const handlelogin = async (username, password) => {
         try {
-            const request = await client.post("/login", { username, password });
+            const request = await api.post("/login", { username, password });
             if (request.status === httpStatus.OK) {
                 console.log("logged in");
                 localStorage.setItem("token", request.data.token);
@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }) => {
 
     const gethisotryofuser = async () => {
         try {
-            const req = await client.get("/get_all_activity", {
+            const req = await api.get("/get_all_activity", {
                 params: {
                     token: localStorage.getItem("token"),
                 },
@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }) => {
 
     const addtouserhistory = async (meetingcode) => {
         try {
-            const request = await client.post("/add_to_activity", {
+            const request = await api.post("/add_to_activity", {
                 token: localStorage.getItem("token"),
                 meeting_code: meetingcode,
             });

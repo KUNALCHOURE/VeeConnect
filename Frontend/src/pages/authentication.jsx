@@ -1,167 +1,133 @@
-import * as React from 'react';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import CssBaseline from '@mui/material/CssBaseline';
-import TextField from '@mui/material/TextField';
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import Typography from '@mui/material/Typography';
-import Container from '@mui/material/Container';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { useState } from 'react';
-import { AuthContext } from '../context/authecontext';
-import { Snackbar } from '@mui/material';
+import React, { useState, useContext } from "react";
+import { Link } from "react-router-dom";
+import { AuthContext } from "../context/authecontext";
+import { motion } from "framer-motion";
+import { Avatar, TextField, Button, Snackbar, Tabs, Tab } from "@mui/material";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 
-const theme = createTheme();
+export default function AuthPage() {
+  const [tabIndex, setTabIndex] = useState(0);
+  const [username, setUsername] = useState("");
+  const [fullname, setFullname] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [open, setOpen] = useState(false);
 
+  const { handleRegister, handlelogin } = useContext(AuthContext);
 
-
-export default function SignUp() {
-
-  const[username,setusername]=React.useState("");
-  const [formstate,setformstate]=React.useState(0);
-  const[fullname,setfullname]=React.useState("");
-  const[password,setpassword]=React.useState("");
-  const[error,seterror]=React.useState("");
-  const[message,setmessage]=React.useState("");
- const[open,setopen]=React.useState(false);
-
-
- const { handleRegister, handlelogin } = React.useContext(AuthContext);
- let handleAuth=async()=>{
-  try {
-    if(formstate===0){
-      let result=await handlelogin(username,password);
-      console.log(result);
-      setmessage(result);
-      
-      
-  
+  const handleAuth = async () => {
+    try {
+      if (tabIndex === 0) {
+        let result = await handlelogin(username, password);
+        setMessage(result);
+      } else {
+        let result = await handleRegister(fullname, username, password);
+        setMessage(result);
+        setOpen(true);
+        setUsername("");
+        setPassword("");
+        setFullname("");
+        setTabIndex(0);
+      }
+    } catch (error) {
+      let message = error.response?.data?.message || "An unexpected error occurred";
+      setError(message);
     }
-    if(formstate===1){
-      let result=await handleRegister(fullname,username,password);
-      console.log(result);
-      setmessage(result);
-      setopen(true);
-      setusername("");
-      seterror("");
-      setformstate(0);
-      setpassword("");
-    }
-  }
-  catch (error) {
-    console.log(error);
-    let message = error.response?.data?.message || "An unexpected error occurred";
-    seterror(message);
-  }
-  
- }
-
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      fullName: data.get('fullName'),
-      email: data.get('email'),
-      password: data.get('password'),
-    });
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <Box
-          sx={{
-            marginTop: 8,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-        >
-          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-            <LockOutlinedIcon />
-          </Avatar>
-     
-          <div>
-            <Button variant={formstate===0 ?"contained":""} onClick={()=> setformstate(0)}>
-              Sign In
-            </Button>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 to-gray-900 text-white">
+      {/* Authentication Container */}
+      <motion.div
+        className="w-full max-w-md bg-white bg-opacity-10 backdrop-blur-lg shadow-lg rounded-lg p-8 text-center"
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        {/* Avatar Icon */}
+        <Avatar sx={{ bgcolor: "orange", margin: "auto" }}>
+          <LockOutlinedIcon />
+        </Avatar>
+        <h1 className="text-2xl font-semibold mt-3">
+          {tabIndex === 0 ? "Sign In" : "Sign Up"}
+        </h1>
 
-            <Button variant={formstate===1 ?"contained":""} onClick={()=> setformstate(1)}>
-              Sign Up
-            </Button>
+        {/* Tabs for Switching */}
+        <Tabs 
+          value={tabIndex} 
+          onChange={(e, newValue) => setTabIndex(newValue)} 
+          centered
+          textColor="inherit"
+          indicatorColor="secondary"
+          className="mt-4"
+        >
+          <Tab label="Sign In" />
+          <Tab label="Sign Up" />
+        </Tabs>
+
+        {/* Form Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="space-y-4 mt-4">
+            {/* Full Name Input (Only for Signup) */}
+            {tabIndex === 1 && (
+              <TextField
+                fullWidth
+                label="Full Name"
+                variant="outlined"
+                className="bg-white rounded-lg"
+                value={fullname}
+                onChange={(e) => setFullname(e.target.value)}
+              />
+            )}
+
+            {/* Username Field */}
+            <TextField
+              fullWidth
+              label="Username"
+              variant="outlined"
+              className="bg-white rounded-lg"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+
+            {/* Password Field */}
+            <TextField
+              fullWidth
+              label="Password"
+              type="password"
+              variant="outlined"
+              className="bg-white rounded-lg"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </div>
 
-          <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
-            <Grid container spacing={2}>
-             
-              {formstate===1 ?
-              <Grid item xs={12}>
-              <TextField
-                  autoComplete="given-name"
-                  name="FullName"
-                  required
-                  fullWidth
-                  id="FullName"
-                  label="FullName"
-                  autoFocus
-                  onChange={(e)=>setfullname(e.target.value)}
-                />
-                </Grid>
-              :<></>}
+          {/* Error Message */}
+          {error && <p className="text-red-500 mt-2">{error}</p>}
 
-              <Grid item xs={12}>
-                <TextField
-                  autoComplete="given-name"
-                  name="UserName"
-                  required
-                  fullWidth
-                  id="UserName"
-                  label="UserName"
-                  autoFocus
-                  value={username}
-                  onChange={(e)=>setusername(e.target.value)}
-                />
-              </Grid>
-             
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type="password"
-                  id="password"
-                  value={password}
-                  autoComplete="new-password"
-                  onChange={(e)=>setpassword(e.target.value)}
-                />
-              </Grid>
-            </Grid>
-            <p style={{color:'red'}}>{error}</p>
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              onClick={handleAuth}
-            >
-             {formstate===0 ? "Sign In": "Register"}
-            </Button>
-          </Box>
-        </Box>
-      </Container>
+          {/* Action Button */}
+          <motion.button
+            className="mt-6 w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold text-lg rounded-lg shadow-lg transition-all transform hover:scale-105"
+            onClick={handleAuth}
+            whileHover={{ scale: 1.05 }}
+          >
+            {tabIndex === 0 ? "Sign In" : "Register"}
+          </motion.button>
 
-      <Snackbar
-      open={open}
-      autoHideDuration={400}
-      message={message}
-  
-    />
-    
-    </ThemeProvider>
+          {/* Link to Home */}
+          <p className="mt-4 text-gray-300">
+            <Link to="/" className="text-orange-400 hover:underline">Back to Home</Link>
+          </p>
+        </motion.div>
+      </motion.div>
+
+      {/* Snackbar Notification */}
+      <Snackbar open={open} autoHideDuration={4000} message={message} onClose={() => setOpen(false)} />
+    </div>
   );
 }

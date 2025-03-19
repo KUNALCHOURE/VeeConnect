@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react'
 import withAuth from '../utils/withauth';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../layout/navbar';
+import Navbar from '../layout/Navbar.jsx';
 import { Button, IconButton, TextField } from '@mui/material';
 import HistoryIcon from '@mui/icons-material/History';
 import '../styles/home.css'

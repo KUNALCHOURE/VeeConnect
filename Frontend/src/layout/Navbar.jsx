@@ -21,7 +21,7 @@ export default function Navbar() {
 
         {/* Navigation Links */}
         <div className="flex items-center space-x-6">
-          <p className="text-gray-300 hover:text-white transition duration-300 cursor-pointer flex items-center">
+          <p className="text-gray-300 hover:text-white transition duration-300 cursor-pointer flex items-center"  >
             <FaUserPlus className="mr-2 text-orange-400" /> Join as Guest
           </p>
           <button 
