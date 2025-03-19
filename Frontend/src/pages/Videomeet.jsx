@@ -227,7 +227,7 @@ let[chat,setchat]=useState(false);
     }
   };
 
-  let  ConnectToSocketServer=()=>{
+  let ConnectToSocketServer=()=>{
     socketRef.current=io.connect(server_url,{secure:false})
     socketRef.current.on('signal',getmessagefromserver);
     socketRef.current.on('connect',()=>{
