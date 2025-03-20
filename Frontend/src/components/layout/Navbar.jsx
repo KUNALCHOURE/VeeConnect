@@ -9,19 +9,23 @@ export default function Navbar() {
     navigate("/auth");
   };
 
+  const handdlejoinasguest=()=>{{
+    navigate("/home")
+  }}
+
   return (
     <div className="w-full bg-gray-900 shadow-lg py-4">
       <nav className="container mx-auto flex justify-between items-center px-6">
         
         {/* Logo / Branding */}
-        <div className="flex items-center space-x-2 text-white text-2xl font-bold tracking-wide">
+        <div className="flex items-center space-x-2 text-white text-2xl font-bold tracking-wide hover:cursor-pointer" onClick={()=>{navigate("/")}} >
           <FaVideo className="text-orange-500 text-3xl" />
           <span>Live Video Call</span>
         </div>
 
         {/* Navigation Links */}
         <div className="flex items-center space-x-6">
-          <p className="text-gray-300 hover:text-white transition duration-300 cursor-pointer flex items-center"  >
+          <p className="text-gray-300 hover:text-white transition duration-300 cursor-pointer flex items-center"  onClick={handdlejoinasguest} >
             <FaUserPlus className="mr-2 text-orange-400" /> Join as Guest
           </p>
           <button 

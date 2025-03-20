@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../layout/Navbar.jsx";
@@ -6,7 +7,7 @@ import { motion } from "framer-motion";
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 to-gray-900 text-white">
-      <Navbar />
+    
       <div className="container mx-auto flex flex-col-reverse md:flex-row items-center justify-between px-6 py-16 md:py-24">
         
         {/* Left Section - Text Content */}
@@ -41,7 +42,7 @@ export default function LandingPage() {
           transition={{ duration: 0.6 }}
         >
           <img 
-            src="/video-call-illustration.png" 
+            src="/video.png" 
             alt="Video Call" 
             className="w-80 md:w-[500px] drop-shadow-lg"
           />

@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import { Link } from "react-router-dom";
-import { AuthContext } from "../context/authecontext";
+import { AuthContext } from "../../context/authecontext.jsx";
 import { motion } from "framer-motion";
 import { Avatar, TextField, Button, Snackbar, Tabs, Tab } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
