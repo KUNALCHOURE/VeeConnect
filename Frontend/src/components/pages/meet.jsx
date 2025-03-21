@@ -117,26 +117,26 @@ export default function VideoMeeting() {
 
       {/* Controls */}
       <div className="flex justify-center space-x-4 p-4 bg-gray-800 rounded-lg shadow-md">
-        <IconButton onClick={handleVideoClick} className="text-white bg-gray-700 p-3 rounded-lg hover:bg-gray-600">
-          {video ? <VideocamIcon /> : <VideocamOffIcon />}
+        <IconButton onClick={handleVideoClick} className=" bg-gray-700 p-3 rounded-lg hover:bg-gray-600">
+          {video ? <VideocamIcon className="text-white"/> : <VideocamOffIcon className="text-white"/>}
         </IconButton>
         <IconButton onClick={handleMicClick} className="text-white bg-gray-700 p-3 rounded-lg hover:bg-gray-600">
-          {audio ? <MicIcon /> : <MicOffIcon />}
+          {audio ? <MicIcon  className="text-white"/> : <MicOffIcon className="text-white" />}
         </IconButton>
         {screenAvailable && (
           <IconButton onClick={handleScreenShare} className="text-white bg-gray-700 p-3 rounded-lg hover:bg-gray-600">
-            {screen ? <CancelPresentationIcon /> : <PresentToAllIcon />}
+            {screen ? <CancelPresentationIcon  className="text-white"/> : <PresentToAllIcon  className="text-white"/>}
           </IconButton>
         )}
         <IconButton onClick={handleRaiseHand} className="text-white bg-gray-700 p-3 rounded-lg hover:bg-gray-600">
-          <BackHandIcon />
+          <BackHandIcon className="text-white" />
         </IconButton>
-        <IconButton onClick={handleEndCall} className="text-white bg-red-600 p-3 rounded-lg hover:bg-red-500">
-          <CallEndIcon />
+        <IconButton onClick={handleEndCall} className=" bg-red-600 p-3 rounded-lg hover:bg-red-500">
+          <CallEndIcon className="text-red-500" />
         </IconButton>
         <Badge badgeContent={newMessages} color="secondary">
           <IconButton onClick={handleChatToggle} className="text-white bg-gray-700 p-3 rounded-lg hover:bg-gray-600">
-            <ChatIcon />
+            <ChatIcon className="text-white"/>
           </IconButton>
         </Badge>
       </div>
