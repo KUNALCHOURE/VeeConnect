@@ -8,11 +8,11 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 to-gray-900 text-white">
     
-      <div className="container mx-auto flex flex-col-reverse md:flex-row items-center justify-between px-6 py-16 md:py-24">
+      <div className="container mx-auto flex flex-col-reverse md:flex-row items-center justify-evenly px-6 py-16 md:py-24">
         
         {/* Left Section - Text Content */}
         <motion.div 
-          className="text-center md:text-left max-w-lg"
+          className="text-center md:text-left max-w-lg mt-20"
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
@@ -36,7 +36,7 @@ export default function LandingPage() {
 
         {/* Right Section - Animated Image */}
         <motion.div 
-          className="flex justify-center"
+          className="flex justify-center mt-20"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6 }}
@@ -44,7 +44,7 @@ export default function LandingPage() {
           <img 
             src="/video.png" 
             alt="Video Call" 
-            className="w-80 md:w-[500px] drop-shadow-lg"
+            className="w-80 md:w-[500px] drop-shadow-lg "
           />
         </motion.div>
 
