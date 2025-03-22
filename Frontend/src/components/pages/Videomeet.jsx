@@ -101,25 +101,29 @@ export default function VideoMeetComponent() {
   return (
     <>
       {askforusername ? (
-        <div className="lobbyoptions">
-          <div className="lobbycontent" style={{ margin: "17px" }}>
-            <form onSubmit={connect}>
-              <h2 style={{ textAlign: "center" }}>Enter into Lobby</h2>
-              <TextField
-                required
-                id="outlined-basic"
-                label="Username"
-                variant="outlined"
-                value={username}
-                onChange={(e) => setusername(e.target.value)}
-              />
-              <Button variant="contained" type="submit">
-                Connect
-              </Button>
-            </form>
-          </div>
-          <div className="localvideo">
-            <video ref={localVideoRef} autoPlay muted></video>
+          <div className="flex flex-col items-center justify-around min-h-screen bg-gradient-to-b from-blue-900 to-gray-900 p-4 lg:flex-row">
+          <div className="bg-gray-900 shadow-lg rounded-xl p-6 w-full max-w-md text-white border border-gray-700 transform transition duration-300 hover:scale-105">
+      <form onSubmit={connect} className="flex flex-col space-y-5">
+        <h2 className="text-3xl font-extrabold text-center text-orange-400">Enter into Lobby</h2>
+        <TextField
+          required
+          id="outlined-basic"
+          variant="outlined"
+          value={username}
+          onChange={(e) => setusername(e.target.value)}
+          className="w-full bg-white text-black rounded-lg border border-gray-600 focus:border-orange-500 shadow-sm"
+          placeholder="username"
+        />
+        <Button 
+          variant="contained" 
+          type="submit" 
+          className="w-full bg-orange-500  text-white py-3 rounded-lg shadow-md text-lg font-bold">
+          Connect
+        </Button>
+      </form>
+    </div>
+          <div className="mt-6 w-full max-w-md">
+            <video ref={localVideoRef} autoPlay muted className="w-full rounded-lg shadow-md border-2 border-gray-700"></video>
           </div>
         </div>
       )
