@@ -1,12 +1,10 @@
-import  user from "../modles/usermodel.js";
-import httpStatus from "http-status";
-import meeting from "../modles/meetingmodel.js";
 import asynchandler from "../../utils/asynchandler.js";
 import Apierror from "../../utils/Apierror.js";
+import user from "../modles/usermodel.js";
 import Apiresponse from "../../utils/Apiresponse.js";
 import jwt from "jsonwebtoken";
 
-const generateAccessandrefreshtoken = asynchandler(async (userID) => {
+const generateAccessandrefreshtoken = async (userID) => {
   try {
     let userinfo = await user.findById(userID);
 
@@ -22,7 +20,7 @@ const generateAccessandrefreshtoken = asynchandler(async (userID) => {
   } catch (error) {
     throw new Apierror(500, error.message||"Something went wrong while creating access and refresh token");
   }
-});
+};
 
 
 const registerUser = asynchandler(async (req, res) => {
@@ -30,8 +28,10 @@ const registerUser = asynchandler(async (req, res) => {
   let { fullname, username, email, password } = req.body; // Add role with default value
   console.log(fullname);
   console.log(username);
- 
+  // Log role for debugging
 
+  // Validate role
+ 
   if ([fullname, email, username, password].some((field) => field?.trim() === "")) {
     throw new Apierror(400, "All fields are required");
   }
@@ -52,7 +52,7 @@ const registerUser = asynchandler(async (req, res) => {
     email,
     fullname,
     password,
-   
+     // Add role to user creation
   });
   console.log("3rd");
 
@@ -84,7 +84,7 @@ const registerUser = asynchandler(async (req, res) => {
       { 
         user: {
           ...createduser.toObject(),
-          role: createduser.role  // Explicitly include role in response
+        
         }, 
         accesstoken, 
         refreshtoken 
@@ -257,36 +257,12 @@ const changecurrectuserpassword=(asynchandler(async(req,res)=>{
  );
  
  
-
-const addtohistory=asynchandler(async(req,res)=>{
- const{meeting_code}=req.body;
-
- try{
-   const user=req.user;
-    const newmeeting=new meeting({
-        user_id:user.username,
-        meeting_id:meeting_code
-    });
-
-    await newmeeting.save();
-    res.status(httpStatus.CREATED).json({message:"Added the code to the history "})
-
- }
- catch(e){
-    res.json({message:`Something wrong occured ${e}`})
-
- }
-});
-
-
-
 export {
-    registerUser,
-    loginuser,
-    logoutuser,
-    refreshaccesstoken,
-    changecurrectuserpassword,
-    getcurrectuser,
-    updateaccount,
-    addtohistory,
-  };
+  registerUser,
+  loginuser,
+  logoutuser,
+  refreshaccesstoken,
+  changecurrectuserpassword,
+  getcurrectuser,
+  updateaccount
+};
