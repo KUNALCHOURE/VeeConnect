@@ -1,11 +1,11 @@
 import { Server } from "socket.io";
 
 let connections = {};   //stores the connections rooms:ids of persons
-let message = {};  //stores the message in a particular room  room:message[sender ,message]
+let messages = {};  //stores the message in a particular room  room:message[sender ,message]
 let timeonline = {};
 
 const connnectToserver = (server) => {
-  const io = new Server(server, {   //instace of the server is created
+  const io = new Server(server, {   //instance of the server is created
     cors: {
       origin: "*",
       methods: ["GET", "POST"],
@@ -19,21 +19,22 @@ const connnectToserver = (server) => {
 
     // When a user joins a call
     socket.on("join-call", (path) => {   
-      if (!connections[path]) {      //if path doesnt exist it create a new path
+      if (!connections[path]) {      //if path doesn't exist it create a new path
         connections[path] = [];
       }
   
       connections[path].push(socket.id);  //Add the user in the room 
       timeonline[socket.id] = new Date();
-
+      console.log(`👤 New user joined: ${socket.id} | Room: ${path}`);
+      console.log(`📢 Sending "user-joined" to:`, connections[path]);
       // Notify all other users in the room
       connections[path].forEach((connectedSocketId) => {
         io.to(connectedSocketId).emit("user-joined", socket.id, connections[path]);
       });
 
       // Send chat history to the new user
-      if (message[path]) {
-        message[path].forEach((msg) => {
+      if (messages[path]) {
+        messages[path].forEach((msg) => {
           io.to(socket.id).emit(
             "chat-message",
             msg["data"],
@@ -62,11 +63,11 @@ const connnectToserver = (server) => {
       }
 
       if (roomKey) {
-        if (!message[roomKey]) {
-          message[roomKey] = [];
+        if (!messages[roomKey]) {
+          messages[roomKey] = [];
         }
 
-        message[roomKey].push({
+        messages[roomKey].push({
           sender,
           data,
           "socket-id-sender": socket.id,

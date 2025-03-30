@@ -1,11 +1,40 @@
 import express from "express";
-import { register, login, addtohistory, getuserhistory } from "../controllers/usercontroler.js";
+import {
+  registerUser,
+  loginuser,
+  logoutuser,
+  refreshaccesstoken,
+  changecurrectuserpassword,
+  getcurrectuser,
+  updateaccount,
+  addtohistory
+} from "../controllers/usercontroler.js";
+import { verifyJWT } from "../middleware/authmiddleware.js";
 
 const router = express.Router();
 
-router.route("/login").post(login);
-router.route("/register").post(register);
-router.route("/add_to_activity").post(addtohistory);
-router.route("/get_all_activity").post(getuserhistory);
+// User registration
+router.route("/register").post(registerUser);
+
+// User login
+router.route("/login").post(loginuser);
+
+// User logout (requires authentication)
+router.route("/logout").post(verifyJWT, logoutuser);
+
+// Refresh access token (does not require authentication)
+router.route("/refresh-token").post(refreshaccesstoken);
+
+// Change current user's password (requires authentication)
+router.route("/change-password").post(verifyJWT, changecurrectuserpassword);
+
+// Get current user details (requires authentication)
+router.route("/current-user").get(verifyJWT, getcurrectuser);
+
+// Update user account details (requires authentication)
+router.route("/update-account").put(verifyJWT, updateaccount);
+
+// Add to user activity history (requires authentication)
+router.route("/add_to_activity").post(verifyJWT, addtohistory);
 
 export default router;
