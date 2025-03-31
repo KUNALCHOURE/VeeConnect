@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaSignInAlt, FaUserPlus, FaVideo, FaCaretDown, FaSignOutAlt } from "react-icons/fa";
+import { FaSignInAlt, FaUserPlus, FaVideo, FaCaretDown, FaSignOutAlt ,FaUser} from "react-icons/fa";
 import { useAuth } from "../../context/authecontext";
 
 export default function Navbar() {
@@ -21,6 +21,9 @@ export default function Navbar() {
     navigate("/");
   };
 
+  const handleProfile = () => {
+    navigate('/profile');
+  };
   return (
     <div className="w-full bg-gray-900 shadow-lg py-4 fixed z-10">
       <nav className="container mx-auto flex justify-between items-center px-6">
@@ -69,6 +72,12 @@ export default function Navbar() {
                     onClick={handleLogout}
                   >
                     <FaSignOutAlt className="mr-2" /> Logout
+                  </button>
+                  <button
+                    className="w-full flex items-center px-4 py-2 text-white hover:bg-gray-700"
+                    onClick={handleProfile}
+                  >
+                  <FaUser className="mr-2" /> Profile
                   </button>
                 </div>
               )}

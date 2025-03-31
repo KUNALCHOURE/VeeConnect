@@ -55,7 +55,7 @@ const MeetingControls = ({
               className="bg-gray-700 hover:bg-gray-600"
               size="large"
             >
-              {screen ? <ScreenShareIcon fontSize="large" style={{ color: 'white' }} /> : <StopScreenShareIcon fontSize="large" style={{ color: 'white' }} />}
+              {!screen ? <ScreenShareIcon fontSize="large" style={{ color: 'white' }} /> : <StopScreenShareIcon fontSize="large" style={{ color: 'white' }} />}
             </IconButton>
           )}
 

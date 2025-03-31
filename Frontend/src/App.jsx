@@ -8,6 +8,8 @@ import Homecomponent from './components/pages/home';
 import Navbar from './components/layout/Navbar';
 import { useState } from 'react';
 import Footer from './components/layout/Footer';
+import Profile from './components/pages/Profile';
+
 function App() {
   const[inmeeting,setinmeeting]=useState(false);
   return (
@@ -17,9 +19,9 @@ function App() {
       <Routes>
         <Route path="/" element={<Landingpage />} />
         <Route path="/auth" element={<Authentication />} />
-         <Route path="/:url" element={<Videomeetcomponent setinmeeting={setinmeeting}/>}/>
-         <Route path="/home" element={<Homecomponent/>}/>
-
+        <Route path="/home" element={<Homecomponent/>}/>
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/meeting/:url" element={<Videomeetcomponent setinmeeting={setinmeeting}/>}/>
       </Routes>
       {!inmeeting &&  <Footer/>}
     </AuthProvider>
