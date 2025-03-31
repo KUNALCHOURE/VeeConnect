@@ -1,15 +1,49 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
-import Navbar from "../layout/Navbar.jsx";
 import { motion } from "framer-motion";
+import { FaVideo, FaDesktop, FaComments, FaShieldAlt, FaUserFriends, FaClock } from 'react-icons/fa';
+import { useAuth } from '../../context/authecontext';
 
 export default function LandingPage() {
+  const { user } = useAuth();
+
+  const features = [
+    {
+      icon: <FaVideo className="w-8 h-8" />,
+      title: "HD Video Calls",
+      description: "Crystal clear video quality for seamless communication"
+    },
+    {
+      icon: <FaDesktop className="w-8 h-8" />,
+      title: "Screen Sharing",
+      description: "Share your screen instantly with other participants"
+    },
+    {
+      icon: <FaComments className="w-8 h-8" />,
+      title: "Real-time Chat",
+      description: "Built-in messaging for quick communication"
+    },
+    {
+      icon: <FaShieldAlt className="w-8 h-8" />,
+      title: "Secure Calls",
+      description: "End-to-end encryption for your privacy"
+    },
+    {
+      icon: <FaUserFriends className="w-8 h-8" />,
+      title: "Group Calls",
+      description: "Connect with multiple participants simultaneously"
+    },
+    {
+      icon: <FaClock className="w-8 h-8" />,
+      title: "24/7 Available",
+      description: "Access your meetings anytime, anywhere"
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 to-gray-900 text-white">
-    
-      <div className="container mx-auto flex flex-col-reverse md:flex-row items-center justify-evenly px-6 py-16 md:py-24">
-        
+      {/* Hero Section */}
+      <div className=" h-screen container mx-auto flex flex-col-reverse md:flex-row items-center justify-evenly px-6 py-16 md:py-24">
         {/* Left Section - Text Content */}
         <motion.div 
           className="text-center md:text-left max-w-lg mt-20"
@@ -28,8 +62,8 @@ export default function LandingPage() {
             className="mt-6 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold text-lg rounded-lg shadow-lg transition-all"
             whileHover={{ scale: 1.05 }}
           >
-            <Link to="/home" className="text-white no-underline">
-              Get Started
+            <Link to={user ? "/home" : "/auth"} className="text-white no-underline">
+              {user ? "Go to Dashboard" : "Get Started"}
             </Link>
           </motion.button>
         </motion.div>
@@ -44,11 +78,110 @@ export default function LandingPage() {
           <img 
             src="/video.png" 
             alt="Video Call" 
-            className="w-80 md:w-[500px] drop-shadow-lg "
+            className="w-80 md:w-[500px] drop-shadow-lg"
           />
         </motion.div>
-
       </div>
+
+      {/* Features Section */}
+      <section className=" h-screen py-20 px-4 sm:px-6 lg:px-8 bg-gray-900/50">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-12">Why Choose Us</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="bg-gray-800/50 p-6 rounded-lg hover:bg-gray-700/50 transition-colors"
+              >
+                <div className="text-orange-500 mb-4">{feature.icon}</div>
+                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                <p className="text-gray-400">{feature.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-12">What Our Users Say</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                name: "Sarah Johnson",
+                role: "Remote Worker",
+                text: "The best video conferencing platform I've used. Crystal clear quality and reliable connection."
+              },
+              {
+                name: "Mike Chen",
+                role: "Business Owner",
+                text: "Perfect for our team meetings. The screen sharing feature is incredibly useful."
+              },
+              {
+                name: "Emma Davis",
+                role: "Teacher",
+                text: "Great for online classes. The chat feature helps keep students engaged."
+              }
+            ].map((testimonial, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="bg-gray-800/50 p-6 rounded-lg"
+              >
+                <p className="text-gray-300 mb-4">"{testimonial.text}"</p>
+                <div>
+                  <p className="font-semibold">{testimonial.name}</p>
+                  <p className="text-gray-400 text-sm">{testimonial.role}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-900/50">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
+          <div className="space-y-6">
+            {[
+              {
+                question: "How do I start a meeting?",
+                answer: "Simply log in to your account, click 'New Meeting', and share the meeting link with your participants."
+              },
+              {
+                question: "Is there a time limit for meetings?",
+                answer: "Free users have a 40-minute limit per meeting. Pro and Enterprise users have unlimited meeting duration."
+              },
+              {
+                question: "Can I record meetings?",
+                answer: "Yes, Pro and Enterprise users can record meetings and save them to their account."
+              },
+              {
+                question: "What devices can I use?",
+                answer: "Our platform works on desktop browsers, mobile browsers, and we offer native apps for iOS and Android."
+              }
+            ].map((faq, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="bg-gray-800/50 p-6 rounded-lg"
+              >
+                <h3 className="text-xl font-semibold mb-2">{faq.question}</h3>
+                <p className="text-gray-400">{faq.answer}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

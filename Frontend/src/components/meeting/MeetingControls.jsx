@@ -23,6 +23,7 @@ const MeetingControls = ({
   onScreenToggle,
   onEndCall,
   onChatToggle,
+  onSendMessage,
 }) => {
   return (
     <motion.div

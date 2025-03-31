@@ -1,39 +1,58 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { AuthContext } from "../../context/authecontext.jsx";
+import { useAuth } from "../../context/authecontext.jsx"; // Use the custom hook for accessing AuthContext
 import { motion } from "framer-motion";
-import { Avatar, TextField, Button, Snackbar, Tabs, Tab } from "@mui/material";
+import { Avatar, TextField, Snackbar, Tabs, Tab } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import { useNavigate } from "react-router-dom";
 
 export default function AuthPage() {
   const [tabIndex, setTabIndex] = useState(0);
-  const [username, setUsername] = useState("");
-  const [fullname, setFullname] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+    fullname: "",
+   
+  });
+  const navigator=useNavigate();
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [open, setOpen] = useState(false);
 
-  const { handleRegister, handlelogin } = useContext(AuthContext);
+  const { login, register } = useAuth(); // Use the login and register functions from the context
 
   const handleAuth = async () => {
     try {
       if (tabIndex === 0) {
-        let result = await handlelogin(username, password);
-        setMessage(result);
+        await login({ username: formData.username, password: formData.password });
+        setMessage("Logged in successfully!");
+        navigator('/');
       } else {
-        let result = await handleRegister(fullname, username, password);
-        setMessage(result);
+        await register(formData);
+        setMessage("Registered successfully!");
         setOpen(true);
-        setUsername("");
-        setPassword("");
-        setFullname("");
+        setFormData({
+          username: "",
+          email: "",
+          password: "",
+          fullname: "",
+         
+        });
         setTabIndex(0);
+        navigator('/');
       }
     } catch (error) {
-      let message = error.response?.data?.message || "An unexpected error occurred";
-      setError(message);
+      setError(error.message);
     }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
 
   return (
@@ -80,8 +99,9 @@ export default function AuthPage() {
                 label="Full Name"
                 variant="outlined"
                 className="bg-white rounded-lg"
-                value={fullname}
-                onChange={(e) => setFullname(e.target.value)}
+                name="fullname"
+                value={formData.fullname}
+                onChange={handleChange}
               />
             )}
 
@@ -91,9 +111,23 @@ export default function AuthPage() {
               label="Username"
               variant="outlined"
               className="bg-white rounded-lg"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
             />
+
+            {/* Email Field (Only for Signup) */}
+            {tabIndex === 1 && (
+              <TextField
+                fullWidth
+                label="Email"
+                variant="outlined"
+                className="bg-white rounded-lg"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+              />
+            )}
 
             {/* Password Field */}
             <TextField
@@ -102,8 +136,9 @@ export default function AuthPage() {
               type="password"
               variant="outlined"
               className="bg-white rounded-lg"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
             />
           </div>
 

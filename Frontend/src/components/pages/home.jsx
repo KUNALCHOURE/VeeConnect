@@ -1,84 +1,129 @@
-import React, { useContext, useState } from "react";
-import withAuth from "../../utils/withauth.jsx";
-import { useNavigate } from "react-router-dom";
-import Navbar from "../layout/Navbar.jsx";
-import { Button, TextField, IconButton } from "@mui/material";
-import HistoryIcon from "@mui/icons-material/History";
-import { motion } from "framer-motion";
-import { AuthContext } from "../../context/authecontext.jsx";
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { useAuth } from '../../context/authecontext';
+import { FaVideo, FaUsers, FaCalendarAlt, FaUserFriends, FaCog } from 'react-icons/fa';
+import { toast } from 'react-hot-toast';
+import HeaderMenu from '../common/HeaderMenu';
+import CTAButton from '../common/CTAButton';
 
-function HomeComponent() {
+const HomePage = () => {
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [meetingCode, setMeetingCode] = useState("");
-  const { addtouserhistory } = useContext(AuthContext);
+  const [isMeetingsDropdownOpen, setIsMeetingsDropdownOpen] = useState(false);
+  const [isSettingsDropdownOpen, setIsSettingsDropdownOpen] = useState(false);
 
-  const handleJoinCall = async () => {
-    console.log("helo");
-   // await addtouserhistory(meetingCode);
-    navigate(`/${meetingCode}`);
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      toast.error('Failed to logout');
+    }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-900 to-gray-900 text-white">
-      {/* Navbar */}
-     
-
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-gray-900 text-white">
       {/* Main Content */}
-      <motion.div
-        className="w-full max-w-3xl bg-white bg-opacity-10 backdrop-blur-lg shadow-lg rounded-lg p-8 text-center"
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        <h1 className="text-4xl font-bold mb-4">
-          Providing <span className="text-orange-500">Quality</span> Video Calls
-        </h1>
-        <p className="text-lg text-gray-300 mb-6">
-          Connect with friends, family, and colleagues seamlessly.
-        </p>
+      <main className="pt-20 pb-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Hero Section */}
+          <section className="text-center py-12">
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-5xl font-bold text-white mb-4 bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-yellow-500"
+            >
+              Welcome back, {user?.fullname || 'User'}!
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-xl text-gray-300 mb-8"
+            >
+              Start or join a meeting in seconds
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="flex justify-center space-x-4"
+            >
+              <CTAButton
+                to="/new-meeting"
+                icon={FaVideo}
+                label="New Meeting"
+              />
+              <CTAButton
+                to="/join-meeting"
+                icon={FaUsers}
+                label="Join Meeting"
+                primary={false}
+              />
+            </motion.div>
+          </section>
 
-        {/* Meeting Code Input */}
-        <div className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4">
-          <TextField
-            variant="outlined"
-            fullWidth
-            label="Enter Meeting Code"
-            value={meetingCode}
-            onChange={(e) => setMeetingCode(e.target.value)}
-            className="bg-white rounded-lg"
-          />
+          {/* Quick Actions Section */}
+          <section className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="bg-gray-800/50 p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-700"
+            >
+              <div className="flex items-center space-x-3 mb-4">
+                <FaCalendarAlt className="text-orange-500 text-2xl" />
+                <h3 className="text-lg font-semibold text-white">Schedule Meeting</h3>
+              </div>
+              <p className="text-gray-400 mb-4">Plan your next meeting with ease</p>
+              <CTAButton
+                to="/schedule-meeting"
+                label="Schedule Now"
+                primary={false}
+              />
+            </motion.div>
 
-          {/* Join Button */}
-          <motion.button
-            className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold text-lg rounded-lg shadow-lg transition-all transform hover:scale-105"
-            onClick={handleJoinCall}
-            whileHover={{ scale: 1.05 }}
-          >
-            Join Call
-          </motion.button>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+              className="bg-gray-800/50 p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-700"
+            >
+              <div className="flex items-center space-x-3 mb-4">
+                <FaUserFriends className="text-orange-500 text-2xl" />
+                <h3 className="text-lg font-semibold text-white">View Contacts</h3>
+              </div>
+              <p className="text-gray-400 mb-4">Manage your contacts and teams</p>
+              <CTAButton
+                to="/contacts"
+                label="View Contacts"
+                primary={false}
+              />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1 }}
+              className="bg-gray-800/50 p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-700"
+            >
+              <div className="flex items-center space-x-3 mb-4">
+                <FaCog className="text-orange-500 text-2xl" />
+                <h3 className="text-lg font-semibold text-white">Settings</h3>
+              </div>
+              <p className="text-gray-400 mb-4">Customize your experience</p>
+              <CTAButton
+                to="/profile"
+                label="Go to Settings"
+                primary={false}
+              />
+            </motion.div>
+          </section>
         </div>
-
-        {/* History Button */}
-        <IconButton className="mt-4 text-white hover:text-gray-300" onClick={() => navigate("/history")}>
-          <HistoryIcon fontSize="large" />
-        </IconButton>
-      </motion.div>
-
-      {/* Right Section - Image */}
-      <motion.div
-        className="flex justify-center mt-8"
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.6 }}
-      >
-        <img
-          src="/video-call-illustration.png"
-          alt="Video Call"
-          className="w-80 md:w-[500px] drop-shadow-lg"
-        />
-      </motion.div>
+      </main>
     </div>
   );
-}
+};
 
-export default withAuth(HomeComponent);
+export default HomePage;

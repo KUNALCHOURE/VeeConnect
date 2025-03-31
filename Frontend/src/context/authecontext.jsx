@@ -1,81 +1,101 @@
-import React, { createContext, useState } from 'react';
-import httpStatus from 'http-status';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+// src/context/AuthContext.jsx
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import authservice from '../utils/authservice.js'; // Correct import with lowercase 's'
+import { toast } from 'react-hot-toast';
+import api from '../utils/api.js';
 
-export const AuthContext = createContext({});
-
-const api = axios.create({
-    baseURL: "http://localhost:3000/api/v1/users",
-    withCredentials:true,
-});
+const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-    const [userData, setUserData] = useState();
-    const router = useNavigate();
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    const handleRegister = async (name, username, password) => {
+    const login = async (credentials) => {
         try {
-            const request = await api.post("/register", { name, username, password });
-            if (request.status === httpStatus.CREATED) {
-                console.log("registered");
-                router("/home");
-                return request.data.message;
-            }
+            const data = await authservice.login(credentials);
+            setUser(data.data.user);
+            toast.success('Welcome back!');
         } catch (error) {
+            toast.error(error.message);
             throw error;
         }
     };
 
-    const handlelogin = async (username, password) => {
+    const register = async (userData) => {
         try {
-            const request = await api.post("/login", { username, password });
-            if (request.status === httpStatus.OK) {
-                console.log("logged in");
-                localStorage.setItem("token", request.data.token);
-                router("/home",);
-                return request.data.message;
+            console.log("Inside register function in AuthContext", userData);
+            const response = await authservice.register(userData);
+            console.log("User registered successfully", response);
+            if (!response || !response.data || !response.data.user) {
+                throw new Error("Invalid response from the server");
             }
-        } catch (error) {
-            throw error;
-        }
-    };
-
-    const gethisotryofuser = async () => {
-        try {
-            const req = await api.get("/get_all_activity", {
-                params: {
-                    token: localStorage.getItem("token"),
-                },
-            });
-            console.log(req);
-            return req.data;
+            setUser(response.data.user);
             
+            toast.success(welcomeMessage);
+            return response.data;
         } catch (error) {
-            throw error;
+            console.error("Error during registration:", error);
+            const errorMessage = error?.message || error?.response?.data?.message || "Signup failed. Please try again.";
+            toast.error(errorMessage);
+            throw new Error(errorMessage);
+            
+            
         }
     };
 
-    const addtouserhistory = async (meetingcode) => {
+    const logout = async () => {
         try {
-            const request = await api.post("/add_to_activity", {
-                token: localStorage.getItem("token"),
-                meeting_code: meetingcode,
-            });
-            return request;
+            await authservice.logout();
+            setUser(null);
+            toast.success('Logged out successfully');
         } catch (error) {
+            toast.error('Error logging out');
             throw error;
         }
     };
 
-    const data = {
-        userData,
-        setUserData,
-        addtouserhistory,
-        gethisotryofuser,
-        handleRegister,
-        handlelogin,
+    const isHotelLister = () => {
+        return user?.role === 'hotel_lister';
     };
 
-    return <AuthContext.Provider value={data}>{children}</AuthContext.Provider>;
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                const response = await api.get("/user/current-user");
+                if (response.data.data.userobject) {
+                    setUser(response.data.data.userobject);
+                }
+                console.log("User object:", response.data.data.userobject);
+                console.log(user);
+            } catch (error) {
+                console.error("Auth check failed:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        checkAuth();
+    }, []);
+
+    return (
+        <AuthContext.Provider 
+            value={{ 
+                user, 
+                login, 
+                logout, 
+                register, 
+                loading,
+                isHotelLister
+            }}
+        >
+            {!loading && children}
+        </AuthContext.Provider>
+    );
+};
+
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuth must be used within an AuthProvider');
+    }
+    return context;
 };
