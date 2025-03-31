@@ -16,7 +16,7 @@ var connections = {};
 
 
 
-export default function VideoMeetComponent() {
+export default function VideoMeetComponent({setinmeeting}) {
 
     // Refs
     const socketRef = useRef();
@@ -39,11 +39,7 @@ export default function VideoMeetComponent() {
     const [askForUsername, setAskForUsername] = useState(true);
     const [username, setUsername] = useState("");
     const [meetingId, setMeetingId] = useState(null);
-    // TODO
-    // if(isChrome() === false) {
-
-
-    // }
+   
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -55,6 +51,8 @@ export default function VideoMeetComponent() {
             setMeetingId(newId);
             window.history.replaceState(null, null, `?meetingId=${newId}`);
         }
+       
+        getPermissions();
     }, []);
 
     
@@ -176,12 +174,17 @@ export default function VideoMeetComponent() {
         })
     }
 
-    let getUserMedia = () => {
+    const getUserMedia = () => {
         if ((video && videoAvailable) || (audio && audioAvailable)) {
             navigator.mediaDevices.getUserMedia({ video: video, audio: audio })
                 .then((stream) => {
                     handleStreamSuccess(stream, false);
+                    stream.getVideoTracks().forEach(track => track.enabled = true); // Ensure tracks are enabled
+                    if (localVideoref.current) {
+                        localVideoref.current.srcObject = stream; // Assign stream to video element
+                    }
                 })
+               
                 .catch((e) => console.log("Error accessing user media: ", e));
         } else {
             try {
@@ -192,10 +195,6 @@ export default function VideoMeetComponent() {
             }
         }
     };
-
-
-
-
     const handleStreamSuccess = (stream, isScreen = false) => {
         try {
             // Stop the current local stream tracks
@@ -216,7 +215,11 @@ export default function VideoMeetComponent() {
         for (let id in connections) {
             if (id === socketIdRef.current) continue;
     
-            connections[id].addStream(window.localStream);
+            connections[id].getSenders().forEach(sender => {
+                if (sender.track.kind === 'video') {
+                    sender.replaceTrack(stream.getVideoTracks()[0]);
+                }
+            });
     
             connections[id].createOffer().then((description) => {
                 connections[id].setLocalDescription(description)
@@ -230,7 +233,7 @@ export default function VideoMeetComponent() {
         // Handle stream end
         stream.getTracks().forEach(track => track.onended = () => {
             if (isScreen) {
-                setScreen(false);
+                setScreen(false); // Update state to reflect that screen sharing has stopped
                 getUserMedia(); // Switch back to camera when screen sharing ends
             }
         });
@@ -419,6 +422,7 @@ export default function VideoMeetComponent() {
 
     const connect = () => {
         setAskForUsername(false);
+        setinmeeting(true);
         getMedia();
     };
 

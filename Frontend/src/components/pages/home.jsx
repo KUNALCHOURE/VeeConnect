@@ -34,7 +34,7 @@ const HomePage = () => {
               animate={{ opacity: 1, y: 0 }}
               className="text-5xl font-bold text-white mb-4 bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-yellow-500"
             >
-              Welcome back, {user?.fullname || 'User'}!
+              Welcome back, {user?.username || 'User'}!
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -51,16 +51,11 @@ const HomePage = () => {
               className="flex justify-center space-x-4"
             >
               <CTAButton
-                to="/new-meeting"
+                to="/meeting/a"
                 icon={FaVideo}
                 label="New Meeting"
               />
-              <CTAButton
-                to="/join-meeting"
-                icon={FaUsers}
-                label="Join Meeting"
-                primary={false}
-              />
+             
             </motion.div>
           </section>
 
