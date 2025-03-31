@@ -202,7 +202,7 @@ export default function VideoMeetComponent({setinmeeting}) {
                 window.localStream.getTracks().forEach(track => track.stop());
             }
         } catch (e) {
-            console.log(e);
+            console.log('Error stopping old tracks:', e);
         }
     
         // Set the new stream
@@ -215,26 +215,33 @@ export default function VideoMeetComponent({setinmeeting}) {
         for (let id in connections) {
             if (id === socketIdRef.current) continue;
     
-            connections[id].getSenders().forEach(sender => {
-                if (sender.track.kind === 'video') {
-                    sender.replaceTrack(stream.getVideoTracks()[0]);
-                }
-            });
-    
-            connections[id].createOffer().then((description) => {
-                connections[id].setLocalDescription(description)
-                    .then(() => {
-                        socketRef.current.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }));
-                    })
-                    .catch(e => console.log(e));
-            });
+            try {
+                // Remove old stream and add new stream
+                connections[id].removeStream(window.localStream);
+                connections[id].addStream(stream);
+
+                // Create and send new offer
+                connections[id].createOffer().then((description) => {
+                    connections[id].setLocalDescription(description)
+                        .then(() => {
+                            socketRef.current.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }));
+                        })
+                        .catch(e => console.log('Error setting local description:', e));
+                });
+            } catch (e) {
+                console.log('Error updating peer connection:', e);
+            }
         }
     
         // Handle stream end
-        stream.getTracks().forEach(track => track.onended = () => {
-            if (isScreen) {
-                setScreen(false); // Update state to reflect that screen sharing has stopped
-                getUserMedia(); // Switch back to camera when screen sharing ends
+        stream.getTracks().forEach(track => {
+            if (track) {
+                track.onended = () => {
+                    if (isScreen) {
+                        setScreen(false); // Update state to reflect that screen sharing has stopped
+                        getUserMedia(); // Switch back to camera when screen sharing ends
+                    }
+                };
             }
         });
     };
@@ -366,27 +373,93 @@ export default function VideoMeetComponent({setinmeeting}) {
         let stream = canvas.captureStream()
         return Object.assign(stream.getVideoTracks()[0], { enabled: false })
     }
-
-    const handleVideo = () => {
+    const handleVideo = async () => {
         setVideo((prevVideo) => {
             const newVideoState = !prevVideo;
-            if (window.localStream) {
-                if (newVideoState) {
-                    // Enable video tracks
-                    window.localStream.getVideoTracks().forEach(track => track.enabled = true);
-                } else {
-                    // Disable video tracks and switch to black video
-                    window.localStream.getVideoTracks().forEach(track => track.stop());
-                    const blackStream = new MediaStream([black()]);
-                    window.localStream = blackStream;
-                    if (localVideoref.current) {
-                        localVideoref.current.srcObject = blackStream;
+            
+            if (newVideoState) {
+                // Turn video back on
+                navigator.mediaDevices.getUserMedia({ video: true, audio: audio })
+                    .then((stream) => {
+                        // Stop old tracks
+                        if (window.localStream) {
+                            window.localStream.getTracks().forEach(track => track.stop());
+                        }
+                        
+                        // Set new stream
+                        window.localStream = stream;
+                        if (localVideoref.current) {
+                            localVideoref.current.srcObject = stream;
+                        }
+
+                        // Update all peer connections
+                        for (let id in connections) {
+                            if (id === socketIdRef.current) continue;
+
+                            try {
+                                // Remove old video tracks and add new stream
+                                connections[id].removeStream(window.localStream);
+                                connections[id].addStream(stream);
+
+                                // Create and send new offer
+                                connections[id].createOffer().then((description) => {
+                                    connections[id].setLocalDescription(description)
+                                        .then(() => {
+                                            socketRef.current.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }));
+                                        })
+                                        .catch(e => console.log('Error setting local description:', e));
+                                });
+                            } catch (e) {
+                                console.log('Error updating peer connection:', e);
+                            }
+                        }
+                    })
+                    .catch((e) => console.log("Error accessing user media: ", e));
+            } else {
+                // Turn video off
+                const blackStream = new MediaStream([black()]);
+                
+                // Stop old tracks
+                if (window.localStream) {
+                    window.localStream.getTracks().forEach(track => {
+                        if (track.kind === 'video') {
+                            track.stop();
+                        }
+                    });
+                }
+                
+                // Set new stream
+                window.localStream = blackStream;
+                if (localVideoref.current) {
+                    localVideoref.current.srcObject = blackStream;
+                }
+
+                // Update all peer connections
+                for (let id in connections) {
+                    if (id === socketIdRef.current) continue;
+
+                    try {
+                        // Remove old video tracks and add new stream
+                        connections[id].removeStream(window.localStream);
+                        connections[id].addStream(blackStream);
+
+                        // Create and send new offer
+                        connections[id].createOffer().then((description) => {
+                            connections[id].setLocalDescription(description)
+                                .then(() => {
+                                    socketRef.current.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }));
+                                })
+                                .catch(e => console.log('Error setting local description:', e));
+                        });
+                    } catch (e) {
+                        console.log('Error updating peer connection:', e);
                     }
                 }
             }
             return newVideoState;
         });
     };
+    
     const handleAudio = () => {
         setAudio((prevAudio) => {
             const newAudioState = !prevAudio;
@@ -416,6 +489,7 @@ export default function VideoMeetComponent({setinmeeting}) {
     };
     const handleChatToggle = () => setShowChat(!showChat);
     const handleSendMessage = () => {
+        console.log(message, username);
         socketRef.current.emit('chat-message', message, username);
         setMessage("");
     };
