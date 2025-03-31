@@ -1,4 +1,3 @@
-import Apierror from '../../../backend/utils/Apierror.js';
 import api from './api.js'
 
 const authsetvice={
@@ -16,11 +15,18 @@ const authsetvice={
 
     register:async (credentials)=>{
         try{
-        const response= await api.post('/user/register',credentials);
-         
-         return response.data
+            console.log("Attempting registration with credentials:", credentials);
+            const response= await api.post('/user/register',credentials);
+            console.log("Registration response:", response);
+            return response.data;
         }
         catch (error) {
+            console.error("Registration error details:", {
+                message: error.message,
+                response: error.response?.data,
+                status: error.response?.status,
+                config: error.config
+            });
             throw error.response?.data || error.message;
         }
     },
