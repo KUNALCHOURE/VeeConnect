@@ -8,7 +8,7 @@ import userroute from "./src/routes/userrouts.js";
 import Apierror from "./utils/Apierror.js"; // Ensure this import is correct
 import dotenv from 'dotenv'
 import cookieParser from "cookie-parser";
-
+import meetingroute from "./src/routes/meetingroutes.js";
 dotenv.config();
 // Initialize Express app
 const app = express();
@@ -29,7 +29,7 @@ app.use(cors({
 app.use(cookieParser());
 // Routes
 app.use("/api/v1/user", userroute);
-
+app.use("/api/v1/meeting", meetingroute);
 // Database connection
 const start = async () => {
   try {
