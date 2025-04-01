@@ -5,6 +5,8 @@ import MeetingControls from '../meeting/MeetingControls';
 import ChatPanel from '../meeting/ChatPanel';
 import VideoGrid from '../meeting/VideoGrid';
 import { v4 as uuidv4 } from 'uuid';
+import api from '../../utils/api'; // Adjust the path to your api file
+import { useAuth } from '../../context/authecontext';
 
 const server_url = "http://localhost:3000";
 
@@ -39,7 +41,7 @@ export default function VideoMeetComponent({setinmeeting}) {
     const [askForUsername, setAskForUsername] = useState(true);
     const [username, setUsername] = useState("");
     const [meetingId, setMeetingId] = useState(null);
-   
+   const {user}=useAuth();
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -480,12 +482,113 @@ export default function VideoMeetComponent({setinmeeting}) {
             return newScreenState;
         });
     };
-    const handleEndCall = () => {
-        try {
-            let tracks = localVideoref.current.srcObject.getTracks();
-            tracks.forEach(track => track.stop());
-        } catch (e) { }
+
+    const handleEndCall = async () => {
+      try {
+        // First, collect all the meeting data
+        const participants = [
+          { 
+            user: user._id,  // Current user's ID (should be a valid MongoDB ObjectId)
+            username: username || "Guest"  // Current user's username
+          }
+        ];
+
+        // Add other participants only if they have valid user IDs
+        videos.forEach(video => {
+          if (video.userId) {  // Only add participants with valid user IDs
+            participants.push({
+              user: video.userId,
+              username: video.username || "Guest"
+            });
+          }
+        });
+    
+        const chatMessages = messages.map(msg => ({
+          sender: msg.sender || "Guest",
+          message: msg.data,
+          createdAt: new Date()  // Add timestamp for each message
+        }));
+
+        // Validate required data
+        if (!meetingId) {
+          throw new Error("Meeting ID is required");
+        }
+
+        if (!participants.length) {
+          throw new Error("At least one participant is required");
+        }
+
+        console.log('Saving meeting history with data:', {
+          meeting_id: meetingId,
+          participants,
+          chats: chatMessages
+        });
+
+        // Make API call to save meeting history
+        const response = await api.post('/meeting/addhistory', {
+          meeting_id: meetingId,
+          participants,
+          chats: chatMessages
+        });
+
+        console.log('Meeting history saved successfully:', response.data);
+    
+        // After successfully saving the history, proceed with ending the call
+        // Stop media tracks
+        if (localVideoref.current && localVideoref.current.srcObject) {
+          localVideoref.current.srcObject.getTracks().forEach(track => track.stop());
+        }
+
+        // Stop all remote video tracks
+        videos.forEach(video => {
+          if (video.stream) {
+            video.stream.getTracks().forEach(track => track.stop());
+          }
+        });
+    
+        // Clean up socket connections
+        if (socketRef.current) {
+          socketRef.current.disconnect();
+        }
+
+        // Clean up peer connections
+        Object.values(connections).forEach(connection => {
+          connection.close();
+        });
+        connections = {};
+    
+        // Update meeting state
+        setinmeeting(false);
+
+        // Navigate to home page
         window.location.href = "/";
+      } catch (error) {
+        console.error('Error saving meeting history:', error);
+        // Even if saving history fails, we should still end the call
+        if (localVideoref.current && localVideoref.current.srcObject) {
+          localVideoref.current.srcObject.getTracks().forEach(track => track.stop());
+        }
+
+        // Stop all remote video tracks
+        videos.forEach(video => {
+          if (video.stream) {
+            video.stream.getTracks().forEach(track => track.stop());
+          }
+        });
+
+        if (socketRef.current) {
+          socketRef.current.disconnect();
+        }
+
+        // Clean up peer connections
+        Object.values(connections).forEach(connection => {
+          connection.close();
+        });
+        connections = {};
+
+        setinmeeting(false);
+        window.location.href = "/";
+      }
     };
     const handleChatToggle = () => setShowChat(!showChat);
     const handleSendMessage = () => {
