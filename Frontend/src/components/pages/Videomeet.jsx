@@ -41,7 +41,8 @@ export default function VideoMeetComponent({setinmeeting}) {
     const [askForUsername, setAskForUsername] = useState(true);
     const [username, setUsername] = useState("");
     const [meetingId, setMeetingId] = useState(null);
-   const {user}=useAuth();
+    const [participants, setParticipants] = useState([]);
+    const {user}=useAuth();
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -53,6 +54,7 @@ export default function VideoMeetComponent({setinmeeting}) {
             setMeetingId(newId);
             window.history.replaceState(null, null, `?meetingId=${newId}`);
         }
+    
        
         getPermissions();
     }, []);
@@ -286,7 +288,7 @@ export default function VideoMeetComponent({setinmeeting}) {
         socketRef.current.on('signal', gotMessageFromServer);
     
         socketRef.current.on('connect', () => {
-            socketRef.current.emit('join-call', meetingId); // Use meetingId
+            socketRef.current.emit('join-call', meetingId,"",username); // Use meetingId
             socketIdRef.current = socketRef.current.id;
 
             socketRef.current.on('chat-message', addMessage);
@@ -296,6 +298,16 @@ export default function VideoMeetComponent({setinmeeting}) {
             });
     
             socketRef.current.on('user-joined', (id, clients) => {
+                // Add the new user to participants list
+                setParticipants(prevParticipants => {
+                    // Check if user already exists in participants
+                    const userExists = prevParticipants.some(p => p.socketId === id);
+                    if (!userExists) {
+                        return [...prevParticipants, { socketId: id, username: username || "Guest" }];
+                    }
+                    return prevParticipants;
+                });
+                
                 clients.forEach((socketListId) => {
                     connections[socketListId] = new RTCPeerConnection(peerConfigConnections);
                     connections[socketListId].onicecandidate = function (event) {
@@ -485,28 +497,24 @@ export default function VideoMeetComponent({setinmeeting}) {
 
     const handleEndCall = async () => {
       try {
-        // First, collect all the meeting data
-        const participants = [
-          { 
-            user: user._id,  // Current user's ID (should be a valid MongoDB ObjectId)
-            username: username || "Guest"  // Current user's username
-          }
-        ];
+        // Format participants for API
+        const formattedParticipants = participants.map(p => ({
+          user: p.userId || "Guest",
+          username: p.username || "Guest"
+        }));
 
-        // Add other participants only if they have valid user IDs
-        videos.forEach(video => {
-          if (video.userId) {  // Only add participants with valid user IDs
-            participants.push({
-              user: video.userId,
-              username: video.username || "Guest"
-            });
-          }
-        });
-    
+        // Add current user if not already in the list
+        if (!formattedParticipants.some(p => p.user === user._id)) {
+          formattedParticipants.push({
+            user: user._id,
+            username: username || "Guest"
+          });
+        }
+
         const chatMessages = messages.map(msg => ({
           sender: msg.sender || "Guest",
           message: msg.data,
-          createdAt: new Date()  // Add timestamp for each message
+          createdAt: new Date()
         }));
 
         // Validate required data
@@ -514,25 +522,25 @@ export default function VideoMeetComponent({setinmeeting}) {
           throw new Error("Meeting ID is required");
         }
 
-        if (!participants.length) {
+        if (!formattedParticipants.length) {
           throw new Error("At least one participant is required");
         }
 
         console.log('Saving meeting history with data:', {
           meeting_id: meetingId,
-          participants,
+          participants: formattedParticipants,
           chats: chatMessages
         });
 
         // Make API call to save meeting history
         const response = await api.post('/meeting/addhistory', {
           meeting_id: meetingId,
-          participants,
+          participants: formattedParticipants,
           chats: chatMessages
         });
 
         console.log('Meeting history saved successfully:', response.data);
-    
+
         // After successfully saving the history, proceed with ending the call
         // Stop media tracks
         if (localVideoref.current && localVideoref.current.srcObject) {
@@ -545,7 +553,7 @@ export default function VideoMeetComponent({setinmeeting}) {
             video.stream.getTracks().forEach(track => track.stop());
           }
         });
-    
+
         // Clean up socket connections
         if (socketRef.current) {
           socketRef.current.disconnect();
@@ -556,7 +564,7 @@ export default function VideoMeetComponent({setinmeeting}) {
           connection.close();
         });
         connections = {};
-    
+
         // Update meeting state
         setinmeeting(false);
 
