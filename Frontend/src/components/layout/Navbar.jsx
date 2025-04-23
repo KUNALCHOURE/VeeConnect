@@ -38,19 +38,24 @@ export default function Navbar() {
 
         {/* Navigation Links */}
         <div className="flex items-center space-x-6 relative">
-          <p
+         
+          {!user ? (
+            <div className="flex flex-col sm:flex-row justify-evenly gap-4 sm:gap-10">
+
+               <p
             className="text-gray-300 hover:text-white transition duration-300 cursor-pointer flex items-center"
             onClick={handleJoinAsGuest}
           >
             <FaUserPlus className="mr-2 text-orange-400" /> Join as Guest
           </p>
-          {!user ? (
+            
             <button
               className="flex items-center px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition transform hover:scale-105"
               onClick={handleLogin}
             >
               <FaSignInAlt className="mr-2" /> Login
             </button>
+            </div>
           ) : (
             <div className="relative">
               <div

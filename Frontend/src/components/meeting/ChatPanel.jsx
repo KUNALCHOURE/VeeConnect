@@ -17,8 +17,8 @@ const ChatPanel = ({ isOpen, onClose, messages, message, setMessage, onSendMessa
             {/* Chat Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-800">
               <h2 className="text-xl font-semibold text-white">Meeting Chat</h2>
-              <IconButton onClick={onClose} className="text-gray-400 hover:text-white">
-                <CloseIcon />
+              <IconButton onClick={onClose} className="">
+                <CloseIcon className='text-white  hover:shadow-sm hover:shadow-white' />
               </IconButton>
             </div>
             {console.log(messages)},

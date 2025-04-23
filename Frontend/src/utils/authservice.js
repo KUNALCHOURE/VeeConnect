@@ -34,7 +34,7 @@ const authsetvice={
     logout:async()=>{
         try {
             console.log("hello");
-            const response = await api.post('/auth/logout');
+            const response = await api.post('/user/logout');
             return response;
         } catch (error) {
             throw error.response?.data || error.message;
