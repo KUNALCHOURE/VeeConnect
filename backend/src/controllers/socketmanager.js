@@ -30,12 +30,12 @@ const connnectToserver = (server) => {
       socket.path = path; // Store the room path in the socket
       socket.userId = userId; // Store userId from authenticated user (optional, null for guests)
       socket.username = username || "Guest"; // Store username, default to "Guest" if not provided
-      console.log(`👤 New user joined: ${socket.id} | Room: ${path}`);
+      console.log(`👤 New user joined: ${socket.id} | Room: ${path} | Username: ${socket.username} | UserId: ${socket.userId}`);
       console.log(`📢 Sending "user-joined" to:`, connections[path]);
 
-      // Notify all other users in the room
+      // Notify all other users in the room with the joining user's username and userId
       connections[path].forEach((connectedSocketId) => {
-        io.to(connectedSocketId).emit("user-joined", socket.id, connections[path]);
+        io.to(connectedSocketId).emit("user-joined", socket.id, connections[path], socket.username, socket.userId);
       });
 
       // Send chat history to the new user
@@ -117,10 +117,13 @@ const connnectToserver = (server) => {
         // If the room is empty, save the meeting data and delete it
         if (connections[roomKey].length === 0) {
           const chatData = messages[roomKey] || [];
-          const participants = connections[roomKey].map(id => ({
-            user: socket.userId || null, // Use stored userId if available
-            username: socket.username || "Guest",
-          }));
+          const participants = connections[roomKey].map(id => {
+            const socket = io.sockets.sockets.get(id);
+            return {
+              user: socket?.userId || null, // Use stored userId if available
+              username: socket?.username || "Guest",
+            };
+          });
 
           try {
             const newMeeting = new meeting({
@@ -128,7 +131,7 @@ const connnectToserver = (server) => {
               chats: chatData.map(msg => ({
                 sender: msg.sender,
                 message: msg.data,
-                createdAt: new Date(), // Use current time or add timestamp in chat-message if needed
+                createdAt: new Date(),
               })),
               participants: participants,
             });
