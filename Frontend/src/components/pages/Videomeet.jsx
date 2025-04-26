@@ -595,7 +595,7 @@ export default function VideoMeetComponent({setinmeeting}) {
         connections = {};
 
         setinmeeting(false);
-        window.location.href = "/";
+       window.location.href = "/";
       }
     };
     const handleChatToggle = () => setShowChat(!showChat);
