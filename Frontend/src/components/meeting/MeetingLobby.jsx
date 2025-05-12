@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { TextField, Button } from '@mui/material';
 import { FaVideo } from 'react-icons/fa';
 
-const MeetingLobby = ({ username, setUsername, onConnect,localVideoRef }) => {
+const MeetingLobby = ({ username, setUsername, onConnect, localVideoRef, meetingTitle }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 to-gray-900 flex items-center justify-center p-4">
       <motion.div
@@ -13,7 +13,12 @@ const MeetingLobby = ({ username, setUsername, onConnect,localVideoRef }) => {
       >
         <div className="text-center mb-8">
           <FaVideo className="text-orange-500 text-4xl mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">Join Meeting</h2>
+          <h2 className="text-2xl font-bold text-white mb-2">
+            {meetingTitle ? meetingTitle : "Join Meeting"}
+          </h2>
+          {meetingTitle && (
+            <p className="text-gray-300 mb-2">Meeting Title: {meetingTitle}</p>
+          )}
           <p className="text-gray-400">Enter your username to join the meeting</p>
         </div>
 
@@ -46,10 +51,12 @@ const MeetingLobby = ({ username, setUsername, onConnect,localVideoRef }) => {
               },
             }}
           />
+          
 
           <Button
             fullWidth
             variant="contained"
+            disabled={!username}
             onClick={onConnect}
             sx={{
               backgroundColor: 'rgb(249 115 22)',
@@ -58,6 +65,10 @@ const MeetingLobby = ({ username, setUsername, onConnect,localVideoRef }) => {
               },
               padding: '12px',
               fontSize: '1rem',
+              '&.Mui-disabled': {
+                backgroundColor: 'rgba(249, 115, 22, 0.3)',
+                color: 'rgba(255, 255, 255, 0.5)',
+              }
             }}
           >
             Join Meeting
@@ -65,6 +76,7 @@ const MeetingLobby = ({ username, setUsername, onConnect,localVideoRef }) => {
         </div>
 
         <div className="mt-8">
+          <p className="text-gray-400 text-sm mb-2">Your camera preview:</p>
           <video
             className="w-full rounded-lg bg-gray-900"
             ref={localVideoRef}
