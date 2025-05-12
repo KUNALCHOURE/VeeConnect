@@ -1,14 +1,14 @@
 import './App.css';
 import { Routes, Route } from 'react-router-dom';
-import Landingpage from './components/pages/landing';
-import Authentication from './components/pages/authentication';
-import { AuthProvider } from './context/authecontext';
-import Videomeetcomponent from './components/pages/videomeet';
-import Homecomponent from './components/pages/home';
-import Navbar from './components/layout/Navbar';
+import Landingpage from './components/pages/landing.jsx';
+import Authentication from './components/pages/authentication.jsx';
+import { AuthProvider } from './context/authecontext.jsx';
+import Videomeetcomponent from './components/pages/videomeet.jsx';
+import Homecomponent from './components/pages/home.jsx';
+import Navbar from './components/layout/Navbar.jsx';
 import { useState } from 'react';
-import Footer from './components/layout/Footer';
-import Profile from './components/pages/Profile';
+import Footer from './components/layout/Footer.jsx';
+import Profile from './components/pages/Profile.jsx';
 
 function App() {
   const[inmeeting,setinmeeting]=useState(false);

@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }) => {
                 }
                 console.log("User object:", response.data.data.userobject);
                 user = response.data.data.userobject;
-                console.log(user);
+                
             } catch (error) {
                 console.error("Auth check failed:", error);
             } finally {
