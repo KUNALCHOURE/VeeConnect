@@ -63,6 +63,7 @@ export default function VideoMeetComponent({setinmeeting}) {
         
         // Set meeting title if provided
         if (urlTitle) {
+            console.log("URL TITLE: ", urlTitle);
             setMeetingTitle(urlTitle);
         }
         
