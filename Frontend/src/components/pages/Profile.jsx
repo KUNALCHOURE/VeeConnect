@@ -24,10 +24,20 @@ const Profile = () => {
 
         const meetingsResponse = await api.get('/meeting/history/user');
         console.log("Meetings response:", meetingsResponse.data);
-        setMeetings(meetingsResponse.data.data);
+        
+        if (meetingsResponse.data.success) {
+          setMeetings(meetingsResponse.data.data);
+        } else {
+          toast.error('Failed to load meeting history');
+        }
       } catch (error) {
         console.error('Error fetching data:', error);
-        toast.error('Failed to load profile data');
+        if (error.response?.status === 401) {
+          // Handle unauthorized access
+          navigate('/auth');
+        } else {
+          toast.error('Failed to load profile data');
+        }
       } finally {
         setLoading(false);
       }
@@ -38,20 +48,34 @@ const Profile = () => {
 
   const fetchMeetingDetails = async (meetingId) => {
     try {
+      setLoading(true);
+      console.log('Fetching meeting details for ID:', meetingId);
+      
+      // Try to fetch meeting details and stats
       const [meetingResponse, statsResponse] = await Promise.all([
         api.get(`/meeting/${meetingId}`),
         api.get(`/meeting/${meetingId}/stats`)
       ]);
 
-      if (meetingResponse.data.success) {
+      if (meetingResponse.data.success && statsResponse.data.success) {
         setSelectedMeeting(meetingResponse.data.data);
         setMeetingStats(statsResponse.data.data);
       } else {
-        toast.error('Failed to load meeting details');
+        toast.error('Meeting details not found');
       }
     } catch (error) {
       console.error('Error fetching meeting details:', error);
-      toast.error('Failed to load meeting details');
+      
+      // Show a more specific error message for 404
+      if (error.response?.status === 404) {
+        toast.error('This meeting no longer exists in the database');
+      } else if (error.response?.status === 401) {
+        navigate('/auth');
+      } else {
+        toast.error('Failed to load meeting details');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -110,30 +134,50 @@ const Profile = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {meetings.map((meeting) => (
                 <motion.div
-                  key={meeting._id}
+                  key={meeting?._id || `meeting-${Math.random()}`}
                   whileHover={{ scale: 1.02 }}
                   className="bg-gray-700/50 rounded-lg p-4 cursor-pointer shadow-md hover:shadow-lg transition-shadow"
                   onClick={() => {
-                    console.log(meeting._id);
-                    fetchMeetingDetails(meeting._id)
-                  }
-                  }
+                    if (meeting?._id) {
+                      console.log("Fetching details for meeting:", meeting._id);
+                      fetchMeetingDetails(meeting._id);
+                    } else {
+                      toast.error("Meeting details unavailable");
+                    }
+                  }}
                 >
                   <div className="flex items-center space-x-2 mb-2">
                     <FaVideo className="text-orange-500" />
-                    <h3 className="font-semibold">{meeting.meetingDetails.meeting_id}</h3>
+                    <h3 className="font-semibold">
+                      {meeting?.meetingDetails?.title || "Untitled Meeting"}
+                    </h3>
+                  </div>
+                  <div className="text-xs text-gray-500 mb-2">
+                    ID: {meeting?.meetingDetails?.meeting_id?.substring(0, 8) || "Unknown"}...
                   </div>
                   <div className="flex items-center space-x-2 text-sm text-gray-400">
                     <FaCalendarAlt />
-                    <span>{new Date(meeting.meetingDetails.start_time).toLocaleDateString()}</span>
+                    <span>
+                      {meeting?.meetingDetails?.start_time 
+                        ? new Date(meeting.meetingDetails.start_time).toLocaleDateString() 
+                        : "Date unavailable"}
+                    </span>
                   </div>
                   <div className="flex items-center space-x-2 text-sm text-gray-400 mt-2">
                     <FaRegClock />
-                    <span>{formatDuration(meeting.meetingDetails.duration)}</span>
+                    <span>
+                      {meeting?.meetingDetails?.duration 
+                        ? formatDuration(meeting.meetingDetails.duration) 
+                        : "Duration unavailable"}
+                    </span>
                   </div>
                   <div className="flex items-center space-x-2 text-sm text-gray-400 mt-2">
                     <FaUsers />
-                    <span>{meeting.meetingDetails.totalParticipants} participants</span>
+                    <span>
+                      {meeting?.meetingDetails?.totalParticipants !== undefined 
+                        ? `${meeting.meetingDetails.totalParticipants} participants` 
+                        : "Participants unavailable"}
+                    </span>
                   </div>
                 </motion.div>
               ))}
@@ -159,7 +203,12 @@ const Profile = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-between items-start mb-4">
-                <h3 className="text-xl font-semibold text-white">Meeting Details</h3>
+                <div>
+                  <h3 className="text-xl font-semibold text-white">
+                    {selectedMeeting.title || "Untitled Meeting"}
+                  </h3>
+                  <p className="text-sm text-gray-400">ID: {selectedMeeting.meeting_id}</p>
+                </div>
                 <button
                   onClick={() => {
                     setSelectedMeeting(null);
@@ -182,19 +231,25 @@ const Profile = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <p className="text-gray-400">Total Participants</p>
-                        <p className="text-white">{meetingStats.totalParticipants}</p>
+                        <p className="text-white font-medium text-lg">{meetingStats.totalParticipants}</p>
                       </div>
                       <div>
                         <p className="text-gray-400">Duration</p>
-                        <p className="text-white">{formatDuration(meetingStats.duration)}</p>
+                        <p className="text-white font-medium text-lg">{formatDuration(meetingStats.duration)}</p>
                       </div>
                       <div>
                         <p className="text-gray-400">Registered Users</p>
-                        <p className="text-white">{meetingStats.registeredUsers}</p>
+                        <p className="text-white font-medium text-lg">{meetingStats.registeredUsers}</p>
                       </div>
                       <div>
                         <p className="text-gray-400">Guest Users</p>
-                        <p className="text-white">{meetingStats.guestUsers}</p>
+                        <p className="text-white font-medium text-lg">{meetingStats.guestUsers}</p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-gray-400">Date & Time</p>
+                        <p className="text-white">
+                          {meetingStats.startTime ? new Date(meetingStats.startTime).toLocaleString() : "Not available"}
+                        </p>
                       </div>
                     </div>
                   </div>

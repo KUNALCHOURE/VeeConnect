@@ -42,11 +42,17 @@ export default function VideoMeetComponent({setinmeeting}) {
     const [username, setUsername] = useState("");
     const [meetingId, setMeetingId] = useState(null);
     const [participants, setParticipants] = useState([]);
-    const {user}=useAuth();
+    const {user} = useAuth();
+    const [meetingTitle, setMeetingTitle] = useState("");
 
+    // Initialize meeting ID from URL or generate a new one
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const id = urlParams.get('meetingId');
+        const urlTitle = urlParams.get('title');
+        const urlUsername = urlParams.get('username');
+        
+        // Set meeting ID
         if (id) {
             setMeetingId(id);
         } else {
@@ -54,10 +60,22 @@ export default function VideoMeetComponent({setinmeeting}) {
             setMeetingId(newId);
             window.history.replaceState(null, null, `?meetingId=${newId}`);
         }
-    
-       
+        
+        // Set meeting title if provided
+        if (urlTitle) {
+            setMeetingTitle(urlTitle);
+        }
+        
+        // Set username if provided (and not logged in)
+        if (urlUsername && !user?.username) {
+            setUsername(urlUsername);
+            // Skip the username prompt if username is provided
+            setAskForUsername(false);
+        }
+        
+        // Get media permissions
         getPermissions();
-    }, []);
+    }, [user]);
 
     
     const getDislayMedia = async () => {
@@ -71,9 +89,11 @@ export default function VideoMeetComponent({setinmeeting}) {
 
     const getPermissions = async () => {
         try {
+            console.log('Getting media permissions...');
             const videoPermission = await navigator.mediaDevices.getUserMedia({ video: true });
             if (videoPermission) {
                 setVideoAvailable(true);
+                setVideo(true); // Set video state to true immediately
                 console.log('Video permission granted');
             } else {
                 setVideoAvailable(false);
@@ -83,6 +103,7 @@ export default function VideoMeetComponent({setinmeeting}) {
             const audioPermission = await navigator.mediaDevices.getUserMedia({ audio: true });
             if (audioPermission) {
                 setAudioAvailable(true);
+                setAudio(true); // Set audio state to true immediately
                 console.log('Audio permission granted');
             } else {
                 setAudioAvailable(false);
@@ -95,17 +116,35 @@ export default function VideoMeetComponent({setinmeeting}) {
                 setScreenAvailable(false);
             }
 
+            // Get both video and audio tracks in a single stream
             if (videoAvailable || audioAvailable) {
-                const userMediaStream = await navigator.mediaDevices.getUserMedia({ video: videoAvailable, audio: audioAvailable });
+                console.log('Initializing media stream...');
+                const userMediaStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: videoAvailable, 
+                    audio: audioAvailable 
+                });
+                
                 if (userMediaStream) {
+                    console.log('Stream obtained successfully, setting local stream');
                     window.localStream = userMediaStream;
+                    
+                    // Explicitly enable all tracks
+                    userMediaStream.getTracks().forEach(track => {
+                        track.enabled = true;
+                        console.log(`Track of kind ${track.kind} enabled:`, track.enabled);
+                    });
+                    
                     if (localVideoref.current) {
                         localVideoref.current.srcObject = userMediaStream;
+                        // Play the video manually to overcome autoplay restrictions
+                        localVideoref.current.play().catch(e => {
+                            console.log('Error playing video:', e);
+                        });
                     }
                 }
             }
         } catch (error) {
-            console.log(error);
+            console.log('Error in getPermissions:', error);
         }
     };
 
@@ -179,21 +218,37 @@ export default function VideoMeetComponent({setinmeeting}) {
     }
 
     const getUserMedia = () => {
+        console.log('getUserMedia called with video:', video, 'audio:', audio);
         if ((video && videoAvailable) || (audio && audioAvailable)) {
             navigator.mediaDevices.getUserMedia({ video: video, audio: audio })
                 .then((stream) => {
+                    console.log('New media stream obtained');
+                    
+                    // Ensure all tracks are enabled
+                    stream.getTracks().forEach(track => {
+                        track.enabled = true;
+                        console.log(`Track of kind ${track.kind} enabled:`, track.enabled);
+                    });
+                    
                     handleStreamSuccess(stream, false);
-                    stream.getVideoTracks().forEach(track => track.enabled = true); // Ensure tracks are enabled
+                    
+                    // Explicitly set the stream to the video element
                     if (localVideoref.current) {
-                        localVideoref.current.srcObject = stream; // Assign stream to video element
+                        console.log('Setting stream to local video element');
+                        localVideoref.current.srcObject = stream;
+                        // Play the video manually
+                        localVideoref.current.play().catch(e => {
+                            console.log('Error playing video:', e);
+                        });
                     }
                 })
-               
                 .catch((e) => console.log("Error accessing user media: ", e));
         } else {
             try {
-                let tracks = localVideoref.current.srcObject.getTracks();
-                tracks.forEach(track => track.stop());
+                if (localVideoref.current && localVideoref.current.srcObject) {
+                    let tracks = localVideoref.current.srcObject.getTracks();
+                    tracks.forEach(track => track.stop());
+                }
             } catch (e) {
                 console.log(e);
             }
@@ -201,9 +256,14 @@ export default function VideoMeetComponent({setinmeeting}) {
     };
     const handleStreamSuccess = (stream, isScreen = false) => {
         try {
+            console.log('Handle stream success called, isScreen:', isScreen);
+            
             // Stop the current local stream tracks
             if (window.localStream) {
-                window.localStream.getTracks().forEach(track => track.stop());
+                window.localStream.getTracks().forEach(track => {
+                    track.stop();
+                    console.log(`Stopping previous track of kind ${track.kind}`);
+                });
             }
         } catch (e) {
             console.log('Error stopping old tracks:', e);
@@ -211,8 +271,20 @@ export default function VideoMeetComponent({setinmeeting}) {
     
         // Set the new stream
         window.localStream = stream;
+        
+        // Ensure all tracks are enabled
+        stream.getTracks().forEach(track => {
+            track.enabled = true;
+            console.log(`New track of kind ${track.kind} enabled:`, track.enabled);
+        });
+        
         if (localVideoref.current) {
+            console.log('Setting new stream to local video element');
             localVideoref.current.srcObject = stream;
+            // Play the video manually
+            localVideoref.current.play().catch(e => {
+                console.log('Error playing video:', e);
+            });
         }
     
         // Add the new stream to all connections
@@ -223,7 +295,7 @@ export default function VideoMeetComponent({setinmeeting}) {
                 // Remove old stream and add new stream
                 connections[id].removeStream(window.localStream);
                 connections[id].addStream(stream);
-
+    
                 // Create and send new offer
                 connections[id].createOffer().then((description) => {
                     connections[id].setLocalDescription(description)
@@ -241,8 +313,9 @@ export default function VideoMeetComponent({setinmeeting}) {
         stream.getTracks().forEach(track => {
             if (track) {
                 track.onended = () => {
+                    console.log(`Track of kind ${track.kind} ended`);
                     if (isScreen) {
-                        setScreen(false); // Update state to reflect that screen sharing has stopped
+                        setScreen(false);
                         getUserMedia(); // Switch back to camera when screen sharing ends
                     }
                 };
@@ -288,26 +361,41 @@ export default function VideoMeetComponent({setinmeeting}) {
         socketRef.current.on('signal', gotMessageFromServer);
     
         socketRef.current.on('connect', () => {
-            socketRef.current.emit('join-call', meetingId,"",username); // Use meetingId
+            // Send user ID and username when joining
+            socketRef.current.emit('join-call', meetingId, user?._id || null, username);
             socketIdRef.current = socketRef.current.id;
 
             socketRef.current.on('chat-message', addMessage);
 
             socketRef.current.on('user-left', (id) => {
                 setVideos((videos) => videos.filter((video) => video.socketId !== id));
+                // Remove user from participants list
+                setParticipants(prevParticipants => 
+                    prevParticipants.filter(p => p.socketId !== id)
+                );
             });
     
-            socketRef.current.on('user-joined', (id, clients) => {
-                // Add the new user to participants list
+            socketRef.current.on('user-joined', (id, clients, joiningUsername, joiningUserId) => {
+                console.log(`New user joined: ${id} with username: ${joiningUsername || 'Guest'}`);
+                
+                // Set a default username if none provided
+                const newUserName = joiningUsername || "Guest";
+                
+                // Add the new user to participants list with their actual username and userId
                 setParticipants(prevParticipants => {
                     // Check if user already exists in participants
                     const userExists = prevParticipants.some(p => p.socketId === id);
                     if (!userExists) {
-                        return [...prevParticipants, { socketId: id, username: username || "Guest" }];
+                        return [...prevParticipants, { 
+                            socketId: id, 
+                            username: newUserName,
+                            userId: joiningUserId || null
+                        }];
                     }
                     return prevParticipants;
                 });
                 
+                // Setup connections after adding participant
                 clients.forEach((socketListId) => {
                     connections[socketListId] = new RTCPeerConnection(peerConfigConnections);
                     connections[socketListId].onicecandidate = function (event) {
@@ -322,19 +410,27 @@ export default function VideoMeetComponent({setinmeeting}) {
                         if (videoExists) {
                             setVideos(videos => {
                                 const updatedVideos = videos.map(video =>
-                                    video.socketId === socketListId ? { ...video, stream: event.stream } : video
+                                    video.socketId === socketListId ? { 
+                                        ...video, 
+                                        stream: event.stream,
+                                        username: participants.find(p => p.socketId === socketListId)?.username || "Guest"
+                                    } : video
                                 );
                                 videoRef.current = updatedVideos;
                                 return updatedVideos;
                             });
                         } else {
+                            // Find the participant info to get username
+                            const participant = participants.find(p => p.socketId === socketListId);
+                            
                             let newVideo = {
                                 socketId: socketListId,
                                 stream: event.stream,
                                 autoplay: true,
-                                playsinline: true
+                                playsinline: true,
+                                username: participant?.username || "Guest"
                             };
-    
+
                             setVideos(videos => {
                                 const updatedVideos = [...videos, newVideo];
                                 videoRef.current = updatedVideos;
@@ -497,16 +593,18 @@ export default function VideoMeetComponent({setinmeeting}) {
 
     const handleEndCall = async () => {
       try {
+        console.log('Ending call, participants:', participants);
+        
         // Format participants for API
         const formattedParticipants = participants.map(p => ({
-          user: p.userId || "Guest",
+          user: p.userId || null, // Send null for guests
           username: p.username || "Guest"
         }));
 
         // Add current user if not already in the list
-        if (!formattedParticipants.some(p => p.user === user._id)) {
+        if (!formattedParticipants.some(p => p.user === user?._id)) {
           formattedParticipants.push({
-            user: user._id,
+            user: user?._id || null,
             username: username || "Guest"
           });
         }
@@ -528,6 +626,7 @@ export default function VideoMeetComponent({setinmeeting}) {
 
         console.log('Saving meeting history with data:', {
           meeting_id: meetingId,
+          title: meetingTitle || `Meeting on ${new Date().toLocaleDateString()}`,
           participants: formattedParticipants,
           chats: chatMessages
         });
@@ -535,6 +634,7 @@ export default function VideoMeetComponent({setinmeeting}) {
         // Make API call to save meeting history
         const response = await api.post('/meeting/addhistory', {
           meeting_id: meetingId,
+          title: meetingTitle || `Meeting on ${new Date().toLocaleDateString()}`,
           participants: formattedParticipants,
           chats: chatMessages
         });
@@ -608,8 +708,37 @@ export default function VideoMeetComponent({setinmeeting}) {
     const connect = () => {
         setAskForUsername(false);
         setinmeeting(true);
+        
+        // Add current user to participants list
+        setParticipants(prevParticipants => [...prevParticipants, {
+            socketId: socketIdRef.current,
+            username: username,
+            userId: user?._id || null
+        }]);
+        
+        // Initialize media right after connecting
+        console.log('Connecting to meeting, initializing media...');
         getMedia();
     };
+
+    // Add useEffect to update video usernames when participants change
+    useEffect(() => {
+        // If we have videos and participants, update videos with usernames
+        if (videos.length > 0 && participants.length > 0) {
+            setVideos(prevVideos => {
+                return prevVideos.map(video => {
+                    const participant = participants.find(p => p.socketId === video.socketId);
+                    if (participant) {
+                        return {
+                            ...video,
+                            username: participant.username || 'Guest'
+                        };
+                    }
+                    return video;
+                });
+            });
+        }
+    }, [participants]);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-900 to-gray-900">
@@ -619,6 +748,7 @@ export default function VideoMeetComponent({setinmeeting}) {
                     setUsername={setUsername}
                     onConnect={connect}
                     localVideoRef={localVideoref}
+                    meetingTitle={meetingTitle}
                 />
             ) : (
                 <>

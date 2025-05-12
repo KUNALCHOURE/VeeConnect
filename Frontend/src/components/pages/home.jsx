@@ -2,13 +2,23 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../context/authecontext';
-import { FaVideo, FaUserFriends, FaCalendarAlt, FaCog } from 'react-icons/fa';
+import { FaVideo, FaUserFriends, FaCalendarAlt, FaCog, FaTimes } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import CTAButton from '../common/CTAButton';
+import { v4 as uuidv4 } from 'uuid';
 
 const HomePage = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  
+  // States for modals
+  const [showNewMeetingModal, setShowNewMeetingModal] = useState(false);
+  const [showJoinMeetingModal, setShowJoinMeetingModal] = useState(false);
+  
+  // Form states
+  const [meetingTitle, setMeetingTitle] = useState("");
+  const [meetingId, setMeetingId] = useState("");
+  const [username, setUsername] = useState(user?.username || "");
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 30 },
@@ -17,6 +27,40 @@ const HomePage = () => {
       y: 0,
       transition: { delay: custom * 0.15, duration: 0.6, ease: 'easeOut' }
     })
+  };
+  
+  // Handle creating a new meeting
+  const handleCreateMeeting = (e) => {
+    e.preventDefault();
+    
+    // Generate a unique meeting ID
+    const newMeetingId = uuidv4();
+    
+    // Navigate to meeting page with title and ID
+    navigate(`/meeting?meetingId=${newMeetingId}&title=${encodeURIComponent(meetingTitle || "Untitled Meeting")}`);
+  };
+  
+  // Handle joining an existing meeting
+  const handleJoinMeeting = (e) => {
+    e.preventDefault();
+    
+    if (!meetingId) {
+      toast.error("Please enter a meeting ID");
+      return;
+    }
+    
+    // If user is not logged in, check if username is provided
+    if (!user && !username) {
+      toast.error("Please enter your name");
+      return;
+    }
+    
+    // Navigate to meeting page with ID and username if needed
+    if (user) {
+      navigate(`/meeting?meetingId=${meetingId}`);
+    } else {
+      navigate(`/meeting?meetingId=${meetingId}&username=${encodeURIComponent(username)}`);
+    }
   };
 
   return (
@@ -51,12 +95,21 @@ const HomePage = () => {
               animate="visible"
               className="flex justify-center space-x-6"
             >
-              <CTAButton
-                to="/meeting/a"
-                icon={FaVideo}
-                label="New Meeting"
-                className="px-8 py-3 text-lg rounded-full shadow-lg bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold hover:scale-105 hover:shadow-2xl transition-all duration-300"
-              />
+              <button
+                onClick={() => setShowNewMeetingModal(true)}
+                className="flex items-center px-8 py-3 text-lg rounded-full shadow-lg bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold hover:scale-105 hover:shadow-2xl transition-all duration-300"
+              >
+                <FaVideo className="mr-2" />
+                New Meeting
+              </button>
+
+              <button
+                onClick={() => setShowJoinMeetingModal(true)}
+                className="flex items-center px-8 py-3 text-lg rounded-full shadow-lg bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold hover:scale-105 hover:shadow-2xl transition-all duration-300"
+              >
+                <FaVideo className="mr-2" />
+                Join Meeting
+              </button>
             </motion.div>
           </section>
 
@@ -202,6 +255,109 @@ const HomePage = () => {
           </section>
         </div>
       </main>
+      
+      {/* New Meeting Modal */}
+      {showNewMeetingModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-70">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-md mx-4"
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-white">Start a New Meeting</h2>
+              <button 
+                onClick={() => setShowNewMeetingModal(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <FaTimes className="text-xl" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleCreateMeeting} className="space-y-4">
+              <div>
+                <label className="block text-gray-300 text-sm font-medium mb-2">
+                  Meeting Title
+                </label>
+                <input
+                  type="text"
+                  value={meetingTitle}
+                  onChange={(e) => setMeetingTitle(e.target.value)}
+                  placeholder="Enter meeting title (optional)"
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+              
+              <button
+                type="submit"
+                className="w-full py-3 rounded-md font-semibold text-white bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors"
+              >
+                Start Meeting
+              </button>
+            </form>
+          </motion.div>
+        </div>
+      )}
+      
+      {/* Join Meeting Modal */}
+      {showJoinMeetingModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-70">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-md mx-4"
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-white">Join a Meeting</h2>
+              <button 
+                onClick={() => setShowJoinMeetingModal(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <FaTimes className="text-xl" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleJoinMeeting} className="space-y-4">
+              <div>
+                <label className="block text-gray-300 text-sm font-medium mb-2">
+                  Meeting ID
+                </label>
+                <input
+                  type="text"
+                  value={meetingId}
+                  onChange={(e) => setMeetingId(e.target.value)}
+                  placeholder="Enter meeting ID"
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              
+              {!user && (
+                <div>
+                  <label className="block text-gray-300 text-sm font-medium mb-2">
+                    Your Name
+                  </label>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Enter your name"
+                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+              )}
+              
+              <button
+                type="submit"
+                className="w-full py-3 rounded-md font-semibold text-white bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              >
+                Join Meeting
+              </button>
+            </form>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };
