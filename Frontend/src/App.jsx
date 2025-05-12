@@ -21,6 +21,7 @@ function App() {
         <Route path="/auth" element={<Authentication />} />
         <Route path="/home" element={<Homecomponent/>}/>
         <Route path="/profile" element={<Profile />} />
+        <Route path="/meeting" element={<Videomeetcomponent setinmeeting={setinmeeting}/>}/>
         <Route path="/meeting/:url" element={<Videomeetcomponent setinmeeting={setinmeeting}/>}/>
       </Routes>
       {!inmeeting &&  <Footer/>}
