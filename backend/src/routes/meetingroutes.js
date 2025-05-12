@@ -12,25 +12,18 @@ import {
 
 const router = Router();
 
-
+// Apply JWT verification to all routes
 router.use(verifyJWT);
 
-
-router.route("/create").post(createMeeting);
-
-
+// Meeting history routes
 router.route("/addhistory").post(addmeetinghistory);
-
-
-router.route("/:meetingId").get(getmeetinghistory);
-
-
 router.route("/history/user").get(getUserMeetingHistory);
-
-router.route("/participant/add").post(addParticipant);
-
-router.route("/end").post(endMeeting);
-
+router.route("/:meetingId").get(getmeetinghistory);
 router.route("/:meetingId/stats").get(getMeetingStats);
+
+// Meeting management routes
+router.route("/create").post(createMeeting);
+router.route("/addparticipant").post(addParticipant);
+router.route("/end").post(endMeeting);
 
 export default router;

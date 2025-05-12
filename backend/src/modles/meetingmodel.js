@@ -7,6 +7,10 @@ const meetingschema = new Schema({
       type: String, 
       required: true 
   },
+  title: {
+      type: String,
+      default: "Untitled Meeting"
+  },
   host_user: {  // To track who created the meeting
       type: Schema.Types.ObjectId,
       ref: "User",
