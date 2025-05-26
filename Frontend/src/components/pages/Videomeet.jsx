@@ -596,53 +596,6 @@ export default function VideoMeetComponent({setinmeeting}) {
       try {
         console.log('Ending call, participants:', participants);
         
-        // Format participants for API
-        const formattedParticipants = participants.map(p => ({
-          user: p.userId || null, // Send null for guests
-          username: p.username || "Guest"
-        }));
-
-        // Add current user if not already in the list
-        if (!formattedParticipants.some(p => p.user === user?._id)) {
-          formattedParticipants.push({
-            user: user?._id || null,
-            username: username || "Guest"
-          });
-        }
-
-        const chatMessages = messages.map(msg => ({
-          sender: msg.sender || "Guest",
-          message: msg.data,
-          createdAt: new Date()
-        }));
-
-        // Validate required data
-        if (!meetingId) {
-          throw new Error("Meeting ID is required");
-        }
-
-        if (!formattedParticipants.length) {
-          throw new Error("At least one participant is required");
-        }
-
-        console.log('Saving meeting history with data:', {
-          meeting_id: meetingId,
-          title: meetingTitle || `Meeting on ${new Date().toLocaleDateString()}`,
-          participants: formattedParticipants,
-          chats: chatMessages
-        });
-
-        // Make API call to save meeting history
-        const response = await api.post('/meeting/addhistory', {
-          meeting_id: meetingId,
-          title: meetingTitle || `Meeting on ${new Date().toLocaleDateString()}`,
-          participants: formattedParticipants,
-          chats: chatMessages
-        });
-
-        console.log('Meeting history saved successfully:', response.data);
-
-        // After successfully saving the history, proceed with ending the call
         // Stop media tracks
         if (localVideoref.current && localVideoref.current.srcObject) {
           localVideoref.current.srcObject.getTracks().forEach(track => track.stop());
@@ -672,8 +625,8 @@ export default function VideoMeetComponent({setinmeeting}) {
         // Navigate to home page
         window.location.href = "/";
       } catch (error) {
-        console.error('Error saving meeting history:', error);
-        // Even if saving history fails, we should still end the call
+        console.error('Error ending call:', error);
+        // Even if there's an error, we should still end the call
         if (localVideoref.current && localVideoref.current.srcObject) {
           localVideoref.current.srcObject.getTracks().forEach(track => track.stop());
         }
@@ -696,7 +649,7 @@ export default function VideoMeetComponent({setinmeeting}) {
         connections = {};
 
         setinmeeting(false);
-       window.location.href = "/";
+        window.location.href = "/";
       }
     };
     const handleChatToggle = () => setShowChat(!showChat);

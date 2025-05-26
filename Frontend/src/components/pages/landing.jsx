@@ -105,83 +105,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">What Our Users Say</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                name: "Sarah Johnson",
-                role: "Remote Worker",
-                text: "The best video conferencing platform I've used. Crystal clear quality and reliable connection."
-              },
-              {
-                name: "Mike Chen",
-                role: "Business Owner",
-                text: "Perfect for our team meetings. The screen sharing feature is incredibly useful."
-              },
-              {
-                name: "Emma Davis",
-                role: "Teacher",
-                text: "Great for online classes. The chat feature helps keep students engaged."
-              }
-            ].map((testimonial, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="bg-gray-800/50 p-6 rounded-lg"
-              >
-                <p className="text-gray-300 mb-4">"{testimonial.text}"</p>
-                <div>
-                  <p className="font-semibold">{testimonial.name}</p>
-                  <p className="text-gray-400 text-sm">{testimonial.role}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-900/50">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
-          <div className="space-y-6">
-            {[
-              {
-                question: "How do I start a meeting?",
-                answer: "Simply log in to your account, click 'New Meeting', and share the meeting link with your participants."
-              },
-              {
-                question: "Is there a time limit for meetings?",
-                answer: "Free users have a 40-minute limit per meeting. Pro and Enterprise users have unlimited meeting duration."
-              },
-              {
-                question: "Can I record meetings?",
-                answer: "Yes, Pro and Enterprise users can record meetings and save them to their account."
-              },
-              {
-                question: "What devices can I use?",
-                answer: "Our platform works on desktop browsers, mobile browsers, and we offer native apps for iOS and Android."
-              }
-            ].map((faq, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="bg-gray-800/50 p-6 rounded-lg"
-              >
-                <h3 className="text-xl font-semibold mb-2">{faq.question}</h3>
-                <p className="text-gray-400">{faq.answer}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+    
+     
     </div>
   );
 }
