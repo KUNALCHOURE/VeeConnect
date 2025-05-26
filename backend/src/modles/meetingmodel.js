@@ -31,20 +31,6 @@ const meetingschema = new Schema({
           default: Date.now
       }
   }],
-  chats: [{
-      sender: {
-          type: String,
-          required: true
-      },
-      message: {
-          type: String,
-          required: true
-      },
-      createdAt: {
-          type: Date,
-          default: Date.now
-      }
-  }],
   start_time: {
       type: Date,
       default: Date.now

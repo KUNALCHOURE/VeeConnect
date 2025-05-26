@@ -23,12 +23,6 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
-  history: [{
-    meetingID: {
-      type: Schema.Types.ObjectId,
-      ref: 'meeting',
-    }
-  }],
   refreshtoken: {
     type: String,
   },

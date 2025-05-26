@@ -57,43 +57,23 @@ const connnectToserver = (server) => {
     });
 
     // Handle chat messages
-    socket.on("chat-message", (data, sender) => {
-      let roomKey = null;
-
-      // Find the room the sender is in
-      for (const [key, value] of Object.entries(connections)) {
-        if (value.includes(socket.id)) {
-          roomKey = key;
-          break;
-        }
+    socket.on("chat-message", (message, username) => {
+      if (!messages[socket.path]) {
+        messages[socket.path] = [];
       }
-
-      if (roomKey) {
-        if (!messages[roomKey]) {
-          messages[roomKey] = [];
-        }
-
-        messages[roomKey].push({
-          sender,
-          data,
-          "socket-id-sender": socket.id,
-        });
-
-        console.log("Message received in room:", roomKey, data);
-
-        // Broadcast the message to all users in the room
-        connections[roomKey].forEach((connectedSocketId) => {
-          io.to(connectedSocketId).emit("chat-message", data, sender, socket.id);
-        });
-      }
+      messages[socket.path].push({
+        data: message,
+        sender: username,
+        "socket-id-sender": socket.id
+      });
+      io.to(socket.path).emit("chat-message", message, username, socket.id);
     });
 
-    // Handle user disconnection
+    // Handle disconnection
     socket.on("disconnect", async () => {
       let roomKey = null;
-      console.log("called");
 
-      // Find the room the user was in
+      // Find the room this socket was in
       for (const [key, value] of Object.entries(connections)) {
         if (value.includes(socket.id)) {
           roomKey = key;
@@ -102,60 +82,23 @@ const connnectToserver = (server) => {
       }
 
       if (roomKey) {
+        // Remove the disconnected socket from the room
+        connections[roomKey] = connections[roomKey].filter(id => id !== socket.id);
+
         // Notify other users in the room
         connections[roomKey].forEach((connectedSocketId) => {
-          if (connectedSocketId !== socket.id) {
-            io.to(connectedSocketId).emit("user-left", socket.id);
-          }
+          io.to(connectedSocketId).emit("user-left", socket.id);
         });
 
-        // Remove the user from the room
-        connections[roomKey] = connections[roomKey].filter(
-          (connectedSocketId) => connectedSocketId !== socket.id
-        );
-
-        // If the room is empty, save the meeting data and delete it
+        // If the room is empty, clean up
         if (connections[roomKey].length === 0) {
-          const chatData = messages[roomKey] || [];
-          const participants = connections[roomKey].map(id => {
-            const socket = io.sockets.sockets.get(id);
-            return {
-              user: socket?.userId || null, // Use stored userId if available
-              username: socket?.username || "Guest",
-            };
-          });
-
-          try {
-            const newMeeting = new meeting({
-              meeting_id: roomKey,
-              chats: chatData.map(msg => ({
-                sender: msg.sender,
-                message: msg.data,
-                createdAt: new Date(),
-              })),
-              participants: participants,
-            });
-            await newMeeting.save();
-
-            // Link meeting to user's history if authenticated
-            if (socket.userId) {
-              await User.findByIdAndUpdate(socket.userId, {
-                $push: { history: { meetingID: newMeeting._id } },
-              });
-            }
-
-            console.log(`Meeting ${roomKey} saved to database`);
-          } catch (error) {
-            console.error("Error saving meeting:", error);
-          }
-
           delete connections[roomKey];
-          delete messages[roomKey]; // Clean up messages
+          delete messages[roomKey];
         }
       }
 
       console.log(`User ${socket.id} disconnected from room ${roomKey}`);
-      delete timeonline[socket.id]; // Clean up user-specific data
+      delete timeonline[socket.id];
     });
   });
 
