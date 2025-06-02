@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import api from '../../utils/api'; // Adjust the path to your api file
 import { useAuth } from '../../context/authecontext';
 
-const SOCKET_SERVER_URL = "http://localhost:3000";
+const SOCKET_SERVER_URL = "https://veeconnect-1.onrender.com/api/v1";
 
 const WEBRTC_CONFIG = {
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
