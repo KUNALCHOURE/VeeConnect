@@ -1,4 +1,4 @@
-# Delta Library - Video Meeting Platform
+# VeeConnect - Video Meeting Platform
 
 A modern web application for video meetings and collaboration, built with React and featuring real-time video conferencing capabilities.
 
