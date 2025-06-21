@@ -88,4 +88,9 @@ The application will be available at `http://localhost:3000`
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+## Screenshots
 
+Home page
+<br>
+
+![Image](https://github.com/user-attachments/assets/d6d4dc42-acbb-4c0d-b982-6605894b8c44)
